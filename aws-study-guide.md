@@ -46,6 +46,13 @@
   - Restore from snapshot when needed for the next test cycle
   - Significantly reduces costs for databases that are only needed periodically (e.g., monthly testing)
   - More cost-efficient than keeping the instance running continuously or modifying instance types repeatedly
+- **Snapshot and Restore for Disaster Recovery**:
+  - For disaster recovery with RPO and RTO of 24 hours, copying automatic snapshots to another region every 24 hours is the most cost-effective solution
+  - This approach is more cost-effective than cross-region read replicas which involve continuous replication
+  - More straightforward than using AWS DMS to create cross-region replication
+  - Simpler than manually setting up cross-region replication of native backups to an S3 bucket
+  - Provides a managed solution that aligns perfectly with 24-hour RPO/RTO requirements without paying for continuous replication
+  - For SQL Server Enterprise Edition databases, this is particularly cost-effective compared to maintaining continuous read replicas
 - **Amazon RDS Multi-AZ DB Cluster Deployment**:
   - Deploys a primary DB instance with synchronous standby instances in different Availability Zones
   - Provides both high availability and increased capacity for read workloads in a single solution
@@ -387,6 +394,15 @@
   - Best practice for workloads processing large quantities of data in parallel with strict isolation requirements
   - Ensures instances are distributed across different racks with separate power and network sources
 
+### EC2 Instance Types
+- **Instance Type Selection for SAP Workloads**:
+  - For SAP applications and databases with high memory utilization, use memory-optimized instance families for both tiers
+  - Memory-optimized instances are designed for workloads that process large datasets in memory
+  - More suitable than compute-optimized instances for SAP applications with high memory demands
+  - Superior to storage-optimized instances which are designed for high sequential read/write access rather than memory-intensive operations
+  - Better fit than HPC-optimized instances which focus on compute-bound applications with high network performance
+  - Memory-optimized instance families align with SAP's typical resource consumption patterns and high memory requirements
+
 ### AWS DataSync
 - **Primary Use**:
   - Automates data transfers between on-premises storage and AWS or between different AWS storage services 
@@ -488,6 +504,14 @@
   - Can be configured at the bucket level or with specific prefix filters
   - Provides a managed solution for regulatory compliance requiring geographic data redundancy
   - More efficient than custom Lambda solutions for copying objects between regions
+- **Secure Content Distribution**:
+  - For distributing copyrighted or sensitive content globally while restricting access by country, combine S3 with CloudFront geographic restrictions
+  - CloudFront's geographic restrictions feature can deny access to users in specific countries
+  - Use signed URLs to provide secure, time-limited access to authorized customers
+  - More effective for geographic restrictions than MFA and public bucket access
+  - More scalable than creating IAM users for each customer
+  - More efficient than deploying EC2 instances with ALBs in specific countries
+  - Provides both security and performance for global content delivery with granular access control
 
 ### Amazon FSx
 - **FSx for NetApp ONTAP**:
@@ -747,6 +771,46 @@
   - Users don't need separate AWS credentials to access AWS resources 
 
 ## Networking and Content Delivery
+
+### Amazon VPC
+- **Internet Gateways**:
+  - A single Internet Gateway can route traffic for the entire VPC (across all AZs) 
+  - Internet Gateways provide a target in VPC route tables for internet-routable traffic 
+  - Do not require redundancy across Availability Zones (they are a managed service) 
+- **Managed Prefix Lists**:
+  - Sets of one or more CIDR blocks to simplify security group and route table configurations 
+  - Customer-managed prefix lists can be shared across AWS accounts via AWS Resource Access Manager 
+  - Helps centrally manage allowed IP ranges across an organization 
+  - Makes it easier to update and maintain security groups and route tables 
+  - Can consolidate multiple security group rules (with different CIDRs but same port/protocol) into a single rule 
+- **NAT Gateways**:
+  - Managed service provided by AWS allowing instances in private subnets to connect to the internet or other AWS services
+  - Do not require patching, are automatically scalable, and provide built-in redundancy for high availability
+  - Should be placed in different Availability Zones for fault tolerance
+  - Replacing NAT instances with NAT gateways in different AZs ensures high availability and automatic scaling
+  - For multi-AZ high availability, create a NAT gateway in each public subnet for each Availability Zone. Then the route tables for private subnets route traffic to their local NAT gateway.
+  - Best practice for high availability is to create one NAT gateway in each AZ where you have private subnets
+  - This design ensures that if one AZ becomes unavailable, instances in other AZs can still access the internet
+  - Using NAT gateways is preferred over NAT instances as they're managed services that automatically scale and are more fault-tolerant
+  - NAT instances require more management and manual intervention for high availability and scaling
+  - A VPC can only have one internet gateway attached at any time
+  - Egress-only internet gateways are specifically designed for outbound-only IPv6 traffic, not for IPv4 traffic
+  - For multi-AZ redundancy, it's recommended to create NAT gateways in each public subnet and configure private subnet route tables to forward traffic to the NAT gateway in the same AZ
+  - This approach maintains high availability by ensuring if one AZ becomes unavailable, the other AZs can still provide internet access for EC2 instances
+- **Security Groups**:
+  - For bastion host setups, the security group of the bastion host should only allow inbound access from the external IP range of the company
+  - For application instances in private subnets, the security group should allow inbound SSH access only from the private IP address of the bastion host
+  - This configuration ensures that only connections from company locations can reach the bastion host, and only the bastion host can access application servers
+  - For web tiers in multi-tier architectures, configure the security group to allow inbound traffic on port 443 from 0.0.0.0/0 (HTTPS from the internet)
+  - For database tiers, configure the security group to allow inbound traffic only on the specific database port (e.g., 1433 for SQL Server) from the web tier's security group
+  - These configurations follow the principle of least privilege and enhance overall security posture
+- **VPC Connectivity Options**:
+  - For connecting two VPCs in the same region within the same AWS account, VPC peering is the most cost-effective solution
+  - VPC peering provides direct network connectivity that enables inter-VPC communication with minimal operational overhead
+  - More cost-effective than Transit Gateway for simpler networking scenarios with moderate data transfer (e.g., 500 GB monthly)
+  - Simpler than Site-to-Site VPN which introduces unnecessary complexity and additional costs
+  - Not suited for Direct Connect which is designed for connecting on-premises networks to AWS
+  - Requires updating route tables in each VPC to use the peering connection for inter-VPC communication
 
 ### AWS PrivateLink
 - **Overview**:
@@ -1058,6 +1122,13 @@
   - Can proactively adjust the number of EC2 instances in anticipation of known load changes 
   - Optimizes costs and performance by ensuring sufficient capacity during peak times 
   - Eliminates lag in scaling up resources, addressing slow application performance issues under sudden load 
+- **Scaling for Unpredictable Traffic Patterns**:
+  - For applications experiencing sudden traffic increases on random days, dynamic scaling is the most cost-effective solution
+  - Dynamic scaling automatically adjusts capacity based on real-time demand by monitoring metrics like CPU utilization
+  - More responsive than manual scaling which requires human intervention
+  - More appropriate than predictive scaling for truly random patterns that don't follow historical trends
+  - Better than scheduled scaling which works only for known, time-based patterns
+  - Ensures application performance is maintained during unexpected traffic spikes while optimizing costs during normal periods
 
 ### Amazon EC2
 - **Instance Purchasing Options**:
