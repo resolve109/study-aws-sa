@@ -460,6 +460,7 @@
   - Protects your VPCs with stateful traffic filtering and intrusion detection 
   - Not used for automatically auditing or managing security groups 
   - Supports deep packet inspection for advanced filtering 
+  - Can replicate on-premises inspection use cases, performing traffic flow inspection and filtering in the AWS environment
 
 ### AWS WAF (Web Application Firewall)
 - **Key Attach Points**:
@@ -882,4 +883,5 @@
   - Consider active-active multi-region architectures (using global databases like DynamoDB global tables or Aurora Global Database) 
   - Implement replication and health checks to enable instant failover across regions 
   - Active-active configurations validated for mission-critical applications.
+
 
