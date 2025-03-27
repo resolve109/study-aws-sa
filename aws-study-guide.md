@@ -422,6 +422,8 @@
   - Specifically designed for Microsoft Windows-based workloads like SharePoint that require Windows-native file system features
   - Perfect for migrations of on-premises SharePoint deployments requiring shared file storage
   - Superior to other storage options like EFS (which uses NFS protocol) for Windows workloads
+  - FSx for Windows File Server is the recommended storage solution for SharePoint in AWS, as it natively supports the SMB protocol and Active Directory integration required by SharePoint
+  - Compared to alternatives, it offers the best combination of performance, native Windows compatibility, and simplified management for SharePoint workloads
 - **FSx for OpenZFS**:
   - For NFS-based Unix/Linux file workloads 
   - Does not support SMB 
@@ -730,6 +732,8 @@
   - NAT instances require more management and manual intervention for high availability and scaling
   - A VPC can only have one internet gateway attached at any time
   - Egress-only internet gateways are specifically designed for outbound-only IPv6 traffic, not for IPv4 traffic
+  - For multi-AZ redundancy, it's recommended to create NAT gateways in each public subnet and configure private subnet route tables to forward traffic to the NAT gateway in the same AZ
+  - This approach maintains high availability by ensuring if one AZ becomes unavailable, the other AZs can still provide internet access for EC2 instances
 - **Security Groups**:
   - For bastion host setups, the security group of the bastion host should only allow inbound access from the external IP range of the company
   - For application instances in private subnets, the security group should allow inbound SSH access only from the private IP address of the bastion host
@@ -765,6 +769,9 @@
   - Makes it easy to deploy, scale, and manage third-party virtual appliances like firewalls
   - Enables transparent network traffic inspection without complex routing configurations
   - Simplifies integration of security appliances from AWS Marketplace into existing architectures
+  - Most efficient solution for inspecting traffic with third-party security appliances before it reaches application servers
+  - Particularly useful when integrating virtual firewall appliances from AWS Marketplace that are configured with IP interfaces
+  - Can be deployed in a dedicated inspection VPC to centralize security inspection for multiple application VPCs
 
 ## Data Analytics and Visualization
 
