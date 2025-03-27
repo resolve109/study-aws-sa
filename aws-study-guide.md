@@ -1,4 +1,3 @@
-```markdown
 # AWS Solutions Architect Study Guide
 
 ## Database Services
@@ -697,14 +696,4 @@
   - Consider active-active multi-region architectures (using global databases like DynamoDB global tables or Aurora Global Database) 
   - Implement replication and health checks to enable instant failover across regions 
 
-## Updates Made
-- Added **DynamoDB TTL** details to clarify auto-deletion of expired items, reducing storage costs.
-- Included **DAX** details for enhancing DynamoDB read performance.
-- Expanded **SQS Message Retention** and **Dead Letter Queue** information for improved resiliency.
-- Detailed the use of **EventBridge** for capturing AWS API events and triggering automated actions.
-- Added **Field-Level Encryption** and **Signed URLs/Cookies** sections in CloudFront for enhanced content security.
-- Inserted best practices for **Hospital Scanning & Document Processing** using Textract/Rekognition and Comprehend.
-- Enhanced the **Static + Dynamic Website** deployment pattern with S3, API Gateway, Lambda, DynamoDB, and CloudFront.
-- Combined and restored sections on **VPC Flow Logs and Monitoring**, **Analysis and ETL Solutions**, **Resource Tagging and Cost Allocation**, and **Big Data Processing** that were previously omitted.
-- Overall, updated and merged correct answer details (highlighted in green in the screenshots) into a comprehensive, larger study guide.
-```
+
