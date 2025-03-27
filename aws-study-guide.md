@@ -231,6 +231,14 @@
   - When combined with Kinesis Data Firehose, creates a scalable solution for capturing and storing customer activity data
   - More secure and flexible than authorization at load balancer or network level
   - Ideal for web applications that need to capture analytics data with proper authorization
+- **Custom Domain Names**:
+  - For providing individual secure URLs for multiple customers:
+    - Register a domain in a registrar
+    - Create a wildcard custom domain in Route 53 with a record pointing to API Gateway
+    - Request a wildcard certificate in AWS Certificate Manager in the same region as API Gateway
+    - Import the certificate into API Gateway and create a custom domain name
+  - This provides the most operationally efficient way to manage individual secure customer URLs
+  - Creating separate hosted zones or API endpoints for each customer introduces unnecessary complexity
 
 ### AWS Backup
 - **Cross-Region Backup**:
@@ -320,6 +328,12 @@
   - More efficient than CloudWatch Container Insights or Systems Manager for centralized cluster management
   - Purpose-built for viewing and connecting to Kubernetes clusters across different environments
   - The most operationally efficient way to view all clusters and workloads from a central location
+- **Secrets Encryption**:
+  - Create a new AWS KMS key and enable Amazon EKS KMS secrets encryption on the EKS cluster
+  - This ensures all secrets stored in the Kubernetes etcd key-value store are encrypted at rest
+  - More secure than using the default EKS configuration without encryption
+  - Required when handling sensitive information in Kubernetes secrets
+  - Amazon EBS CSI driver add-ons do not address etcd secret encryption requirements
 
 ## Compute Services
 
@@ -792,6 +806,15 @@
   - Minimizes administrative overhead by maintaining a single identity source 
   - Users don't need separate AWS credentials to access AWS resources 
 
+### AWS Identity and Access Management (IAM)
+- **Best Practices**:
+  - Create IAM policies that grant least privilege permissions and attach to IAM groups
+  - Group users by department and manage permissions at the group level for operational efficiency
+  - This approach aligns with security best practices by ensuring users have only the permissions necessary for their job functions
+  - More effective for departmental permission management than using SCPs or permissions boundaries
+  - IAM roles are intended for delegation scenarios, not for direct attachment to IAM groups
+  - For cross-account or service-based permissions, roles are more appropriate than group-based policies
+
 ## Networking and Content Delivery
 
 ### Amazon VPC
@@ -884,6 +907,13 @@
   - Routes traffic to the nearest healthy application endpoint 
   - Bypasses DNS caching issues that can lead to outdated routing 
   - Particularly useful for applications requiring real-time communication (e.g., VoIP) 
+- **Gaming Applications**:
+  - Ideal for TCP and UDP multiplayer gaming capabilities that require low latency
+  - Can be placed in front of Network Load Balancers to improve global performance
+  - Routes traffic to the nearest AWS edge location and then to application endpoints over the AWS global network
+  - Superior to CloudFront for applications requiring both TCP and UDP support
+  - Unlike Application Load Balancers, supports the UDP protocol essential for real-time gaming communication
+  - More effective than API Gateway for reducing latency in multiplayer gaming architectures
 
 ### Amazon CloudFront
 - **Key Features**:
