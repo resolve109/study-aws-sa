@@ -7,6 +7,9 @@
   - Read replicas in the same region are cost-effective for serving reports 
   - Cross-region replicas incur higher costs 
   - Verified that read replicas help offload read traffic effectively.
+  - For significant improvement in insert operations performance under heavy write loads, changing to Provisioned IOPS SSD (io1) storage is an effective solution
+  - Particularly effective when storage performance is identified as the bottleneck for databases with millions of daily updates
+  - More targeted approach for addressing I/O bottlenecks than simply increasing instance memory or using burstable performance instances
 - **Multi-AZ Deployments**:
   - Primarily for high availability and disaster recovery 
   - Not intended for scaling workloads 
@@ -95,6 +98,10 @@
   - Provides continuous backups of your tables, allowing restore to any second in the last 1-35 days
   - Can easily meet an RPO of 15 minutes and an RTO of 1 hour by enabling PITR
   - Allows quick recovery from accidental writes or deletes to a precise point in time
+  - Ideal solution for meeting RPO of 15 minutes and RTO of 1 hour requirements
+  - Enables recovery to any point in time within the last 35 days with second-level precision
+  - Superior to global tables for addressing data corruption scenarios that require point-in-time restoration
+  - More efficient and less time-consuming than exporting to S3 Glacier for recovery purposes
 
 ### Amazon Neptune
 - **Use Cases**:
@@ -533,6 +540,12 @@
   - Not used for automatically auditing or managing security groups 
   - Supports deep packet inspection for advanced filtering 
   - Can replicate on-premises inspection use cases, performing traffic flow inspection and filtering in the AWS environment
+  - Makes it easy to deploy essential network protections for all VPCs
+  - Provides customizable rules for stateful traffic inspection and filtering
+  - Scales automatically with network traffic without provisioning or managing infrastructure
+  - Ideal for replacing on-premises inspection servers that perform traffic flow inspection and filtering
+  - More appropriate for traffic inspection and filtering than GuardDuty (which focuses on threat detection)
+  - Provides direct traffic filtering capabilities that Traffic Mirroring alone doesn't offer
 
 ### AWS WAF (Web Application Firewall)
 - **Key Attach Points**:
@@ -554,11 +567,14 @@
   - Integrates with CloudFront for edge-based protection
   - Provides 24×7 access to the AWS DDoS Response Team (DRT) for assistance during attacks
   - Offers protection against DDoS-related charges that might result from attacks
-  - Particularly important for Network Load Balancers which cannot use AWS WAF directly
+- Particularly important for Network Load Balancers which cannot use AWS WAF directly
   - Critical for protecting NLBs in API-driven cloud communication platforms against DDoS attacks
   - Should be combined with AWS WAF on API Gateway for comprehensive protection of API architectures
 
-### AWS IAM Identity Center (AWS Single Sign-On)
+##- Particularly important for Network Load Balancers which cannot use AWS WAF directly
+  - Critical for protecting NLBs in API-driven cloud communication platforms against DDoS attacks
+  - Should be combined with AWS WAF on API Gateway for comprehensive protection of API architectures
+# AWS IAM Identity Center (AWS Single Sign-On)
 - **Key Features**:
   - Centrally manage SSO access to multiple AWS accounts and business applications 
   - Enables unified management of users and their access 
@@ -713,6 +729,11 @@
   - NAT instances require more management and manual intervention for high availability and scaling
   - A VPC can only have one internet gateway attached at any time
   - Egress-only internet gateways are specifically designed for outbound-only IPv6 traffic, not for IPv4 traffic
+- **Security Groups**:
+  - For bastion host setups, configure the security group of the bastion host to only allow inbound access from the company's external IP range
+  - For application instances in private subnets, configure security groups to allow inbound SSH access only from the private IP address of the bastion host
+  - When configuring multi-tier applications, web tier should allow inbound traffic on port 443 from 0.0.0.0/0 (for HTTPS)
+  - For database tiers, restrict inbound traffic to only the specific database port (e.g., 1433 for SQL Server) from the web tier's security group
 
 ### Elastic Load Balancing
 - **Types of Load Balancers**:
@@ -733,6 +754,11 @@
   - Can perform health checks based on HTTP response content to detect application-level errors
   - Automatically removes unhealthy instances from the target group
   - When combined with Auto Scaling, can replace unhealthy instances to maintain application availability
+- **Gateway Load Balancer**:
+  - Ideal for integrating third-party virtual appliances for packet inspection
+  - Deploys in an inspection VPC to analyze traffic before it reaches application servers
+  - Gateway Load Balancer endpoints receive incoming packets and forward them to security appliances
+  - Provides the least operational overhead for implementing traffic inspection with third-party appliances
 
 ## Data Analytics and Visualization
 
@@ -764,6 +790,11 @@
   - Fully managed Business Intelligence (BI) service 
   - Create dashboards and visualizations from multiple data sources 
   - Can connect to data in Amazon OpenSearch Service, Redshift, Athena, RDS, etc. 
+- **Access Control**:
+  - Provides fine-grained access control through its own system of users and groups
+  - Enables sharing dashboards with specific users and groups based on organizational roles
+  - Allows different levels of access (e.g., full access for management team, limited access for others)
+  - More flexible for dashboard sharing than relying solely on IAM roles
 
 ### Amazon Security Lake
 - **Key Features**:
@@ -877,6 +908,13 @@
   - Can proactively adjust the number of EC2 instances in anticipation of known load changes 
   - Optimizes costs and performance by ensuring sufficient capacity during peak times 
   - Eliminates lag in scaling up resources, addressing slow application performance issues under sudden load 
+
+### Amazon EC2
+- **Instance Purchasing Options**:
+  - For production environments running 24/7, Reserved Instances provide the most cost-effective option
+  - For development and test environments running at least 8 hours daily with periods of inactivity, On-Demand Instances offer the best balance of flexibility and cost
+  - Not recommended to use Spot Instances for production workloads that require constant availability
+  - Spot blocks (defined-duration Spot Instances) are less suitable than Reserved Instances for production due to potential interruptions
 
 ## Best Practices and Key Concepts
 
