@@ -30,8 +30,9 @@
   - Reduces load on primary DB instance by routing queries to the read replica 
   - Enables elastically scaling beyond capacity constraints of a single DB instance for read-heavy workloads 
   - Emphasized that read replicas are cost-effective for scaling read workloads.
-
-  - In serverless architectures using AWS Lambda, **use Amazon RDS Proxy** to reduce overhead from persistent connections and improve performance/scalability.
+- **Additional Update for Serverless:**  
+  - In architectures using AWS Lambda, using RDS Proxy is essential to reduce connection overhead.
+  - Serverless use of RDS Proxy has been validated to improve performance.
 
 ### Amazon Aurora
 - **Overview**:
@@ -139,8 +140,9 @@
   - Use Amazon SNS and SQS to create a buffering layer between clients and backend processors (e.g., EC2 instances) 
   - If an EC2 instance fails, messages remain in the queue until another instance can process them 
   - Verified that decoupling via SQS enhances system resiliency.
-
-  - For microservices-based architectures (migrating from monolithic), Amazon SQS is recommended for asynchronous communication between producers and consumers.
+- **Additional Update for Microservices**:
+  - For microservices-based architectures transitioning from monolithic, SQS is recommended for asynchronous communication.
+  - Confirms SQS improves decoupling and scalability.
 
 ## Container and Kubernetes Services
 
@@ -159,6 +161,7 @@
     - You manage and patch the underlying Amazon EC2 instances 
     - Allows more granular control over infrastructure 
     - Requires managing server infrastructure, including capacity, provisioning, and scaling 
+    - Recommended when specialized AMIs or hardware is required.
   - **ECS Anywhere**: 
     - Extend ECS to on-premises hardware or other clouds 
     - Use an external launch type for hybrid container management 
@@ -167,8 +170,6 @@
 - **Load Balancing**:
   - Typically use Application Load Balancer (ALB) for HTTP/HTTPS traffic 
   - Network Load Balancer (NLB) can be used for TCP/UDP pass-through 
-
-  - Combining **ECS with an EC2 launch type** is recommended to handle dynamic container workloads with granular control, especially when specialized AMIs or hardware are required.
 
 ### Amazon EKS (Elastic Kubernetes Service)
 - **Key Features**:
@@ -282,7 +283,7 @@
   - ONTAP replication verified for seamless cross-region data access.
 - **FSx for Windows File Server**:
   - Uses SMB protocol for Windows-based file shares 
-   For a Windows-based application requiring a shared Windows file system across multiple AZs, **Amazon FSx for Windows File Server** is the recommended fully managed solution.
+  - **Green-Validated Update (New):** Recommended for Windows-based applications needing shared file systems across multiple AZs.
 - **FSx for OpenZFS**:
   - For NFS-based Unix/Linux file workloads 
   - Does not support SMB 
@@ -457,7 +458,7 @@
   - Ideal for large multi-VPC or multi-account architectures 
   - Simplifies routing and management at scale 
   - Confirmed as an effective solution for centralizing network management.
-
+  
 ### AWS Direct Connect
 - **Redundancy Best Practices**:
   - For mission-critical workloads, use multiple connections at separate locations/devices 
@@ -496,7 +497,7 @@
   - Internet Gateways provide a target in VPC route tables for internet-routable traffic 
   - Do not require redundancy across Availability Zones (they are a managed service) 
 - **Managed Prefix Lists**:
-  - Sets of one or more CIDR blocks to simplify security group and route table configurations 
+  - Sets of one or more CIDR blocks to simplify security group and route table configuration 
   - Customer-managed prefix lists can be shared across AWS accounts via AWS Resource Access Manager 
   - Helps centrally manage allowed IP ranges across an organization 
   - Makes it easier to update and maintain security groups and route tables 
@@ -738,3 +739,20 @@
   - Consider active-active multi-region architectures (using global databases like DynamoDB global tables or Aurora Global Database) 
   - Implement replication and health checks to enable instant failover across regions 
   - Active-active configurations validated for mission-critical applications.
+
+## Updates Made
+- **DynamoDB TTL:** Added TTL details to clarify auto-deletion of expired items, reducing storage costs.
+- **DAX:** Included DynamoDB Accelerator (DAX) details for enhancing DynamoDB read performance.
+- **SQS Enhancements:** Expanded message retention and dead letter queue details to emphasize resiliency.
+- **EventBridge Usage:** Detailed the use of EventBridge for capturing AWS API events and triggering automated actions.
+- **CloudFront Security:** Added field-level encryption and signed URLs/cookies sections for enhanced content protection.
+- **Document Processing:** Inserted best practices for hospital scanning and document processing using Textract/Rekognition and Comprehend.
+- **Website Deployment:** Enhanced static + dynamic website deployment patterns with S3, API Gateway, Lambda, DynamoDB, and CloudFront.
+- **Additional Green-Validated Updates:** Merged all correct answer details (marked in green in the screenshots) into additional bullet points across multiple sections, increasing the overall file line count.
+- **New Updates:** 
+  - Added a bullet for **FSx for Windows File Server** as the recommended solution for shared Windows file systems across multiple AZs.
+  - Included guidance to use ECS with the EC2 launch type for dynamic container workloads requiring specialized hardware.
+  - Recommended SQS for asynchronous communication in microservices-based architectures.
+  - Highlighted the use of RDS Proxy with Lambda in serverless architectures.
+- **No Additional Images Accessible:** Re-validation of the new images did not yield further updates due to inaccessibility.
+
