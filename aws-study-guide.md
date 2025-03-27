@@ -150,6 +150,12 @@
 - Efficiently serves varying levels of traffic without manual intervention
 - Well-suited for handling serverless API backends with Amazon API Gateway
 - Ideal for scenarios with unpredictable request patterns that may change suddenly
+- **Lambda Execution Role**:
+ - IAM role assumed by Lambda function at runtime
+ - Determines what AWS services and resources the function can access
+ - Permissions associated with this role control function's access to AWS resources
+ - Best practice is to grant only necessary permissions following principle of least privilege
+ - Can be configured with permissions to decrypt data using AWS KMS keys
 
 ### AWS DataSync
 - **Primary Use**:
@@ -195,6 +201,13 @@
 - **FSx for NetApp ONTAP**:
  - Managed storage for SMB/NFS
  - Multi-protocol access
+ - Supports cross-region replication with NetApp SnapMirror technology
+ - Provides seamless way to replicate data across AWS Regions
+ - Maintains ability to access data using same CIFS and NFS protocols
+ - Offers least operational overhead for disaster recovery purposes
+ - Leverages built-in replication capabilities of FSx for NetApp ONTAP
+ - Ensures replicated data can be accessed using same file-sharing protocols as primary Region
+ - Ideal for disaster recovery solutions requiring minimal management complexity
 - **FSx for Windows File Server**:
  - SMB protocol for Windows-based file shares
 - **FSx for OpenZFS**:
@@ -209,6 +222,11 @@
  - Can seamlessly process data directly from S3
  - Provides high levels of throughput, IOPS, and sub-millisecond latencies
  - Enables thousands of compute instances to access data simultaneously
+ - Tailored for workloads that demand both high levels of sustained throughput and data durability
+ - Supports sub-millisecond latency for high-performance computing environments
+ - File systems enable thousands of compute instances to access and process entire datasets simultaneously
+ - Ideal for weather forecasting companies processing hundreds of gigabytes of data with sub-millisecond latency
+ - Provides high-performance file system for large-scale data processing with parallel access requirements
 
 ### Amazon Elastic File System (EFS)
 - **Key Features**:
@@ -216,6 +234,9 @@
  - Grows/shrinks automatically
  - Multi-AZ by default
  - Excellent for Linux-based applications needing shared file access
+- **Throughput Modes**:
+ - Bursting Throughput: Automatically scales throughput to accommodate spikes
+ - Provisioned Throughput: Specifies throughput levels independent of storage amount
 
 ### Amazon Elastic Block Store (EBS)
 - **Key Features**:
@@ -269,6 +290,10 @@
 - **External Keys**:
  - Allows key material import
  - Provides highest level of control but more operational overhead
+- **Key Policies and Permissions**:
+ - Grant permission for Lambda IAM role within KMS key's policy to decrypt
+ - Direct association of Lambda's execution role with permissions to decrypt files
+ - Allow decrypt capability for functions that need to access encrypted data
 
 ### AWS Secrets Manager
 - **Key Features**:
@@ -399,6 +424,11 @@
 - **Types of Load Balancers**:
  - **Application Load Balancer (ALB)**: For HTTP/HTTPS traffic routing at the application layer
  - **Network Load Balancer (NLB)**: For TCP/UDP traffic routing at the transport layer
+   - Supports high throughput of millions of requests per second
+   - Maintains ultra-low latencies ideal for gaming applications using UDP packets
+   - Efficiently distributes UDP traffic across multiple targets
+   - Enables applications to scale out and in according to traffic fluctuations with minimal latency
+   - Commonly used for gaming applications due to low-latency characteristics
  - **Gateway Load Balancer**: For deploying and managing third-party virtual networking appliances
  - **Classic Load Balancer**: Legacy load balancer (not recommended for new implementations)
 - **Application Load Balancer Features**:
