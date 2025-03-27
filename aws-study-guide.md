@@ -245,7 +245,7 @@
    - Ensures all newly created EBS volumes are encrypted automatically
    - Prevents creation of unencrypted volumes
 - **Volume Types**:
- - **General Purpose SSD (gp3)**: 
+ - **General Purpose SSD (gp3)**:
    - Baseline performance of 3,000 IOPS and up to 16,000 IOPS
    - Can provision IOPS independently of storage capacity
    - Most cost-effective when specific IOPS requirements must be met
@@ -373,7 +373,7 @@
  - Traffic remains in the AWS network, avoiding public internet exposure
  - Eliminates need for NAT gateways or VPN for private access to supported endpoints
 - **Interface Endpoints**:
- - Enable private connections between VPC and AWS services 
+ - Enable private connections between VPC and AWS services
  - Use private IP addresses within your VPC
  - When combined with AWS Direct Connect, ensures data accessed from on-premises to AWS doesn't traverse public internet
 
