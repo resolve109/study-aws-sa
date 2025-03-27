@@ -31,6 +31,8 @@
   - Enables elastically scaling beyond capacity constraints of a single DB instance for read-heavy workloads 
   - Emphasized that read replicas are cost-effective for scaling read workloads.
 
+  - In serverless architectures using AWS Lambda, **use Amazon RDS Proxy** to reduce overhead from persistent connections and improve performance/scalability.
+
 ### Amazon Aurora
 - **Overview**:
   - A MySQL- or PostgreSQL-compatible relational database engine 
@@ -138,6 +140,8 @@
   - If an EC2 instance fails, messages remain in the queue until another instance can process them 
   - Verified that decoupling via SQS enhances system resiliency.
 
+  - For microservices-based architectures (migrating from monolithic), Amazon SQS is recommended for asynchronous communication between producers and consumers.
+
 ## Container and Kubernetes Services
 
 ### Amazon ECS (Elastic Container Service)
@@ -163,6 +167,8 @@
 - **Load Balancing**:
   - Typically use Application Load Balancer (ALB) for HTTP/HTTPS traffic 
   - Network Load Balancer (NLB) can be used for TCP/UDP pass-through 
+
+  - Combining **ECS with an EC2 launch type** is recommended to handle dynamic container workloads with granular control, especially when specialized AMIs or hardware are required.
 
 ### Amazon EKS (Elastic Kubernetes Service)
 - **Key Features**:
@@ -276,6 +282,7 @@
   - ONTAP replication verified for seamless cross-region data access.
 - **FSx for Windows File Server**:
   - Uses SMB protocol for Windows-based file shares 
+   For a Windows-based application requiring a shared Windows file system across multiple AZs, **Amazon FSx for Windows File Server** is the recommended fully managed solution.
 - **FSx for OpenZFS**:
   - For NFS-based Unix/Linux file workloads 
   - Does not support SMB 
@@ -450,7 +457,7 @@
   - Ideal for large multi-VPC or multi-account architectures 
   - Simplifies routing and management at scale 
   - Confirmed as an effective solution for centralizing network management.
-  
+
 ### AWS Direct Connect
 - **Redundancy Best Practices**:
   - For mission-critical workloads, use multiple connections at separate locations/devices 
@@ -489,7 +496,7 @@
   - Internet Gateways provide a target in VPC route tables for internet-routable traffic 
   - Do not require redundancy across Availability Zones (they are a managed service) 
 - **Managed Prefix Lists**:
-  - Sets of one or more CIDR blocks to simplify security group and route table configuration 
+  - Sets of one or more CIDR blocks to simplify security group and route table configurations 
   - Customer-managed prefix lists can be shared across AWS accounts via AWS Resource Access Manager 
   - Helps centrally manage allowed IP ranges across an organization 
   - Makes it easier to update and maintain security groups and route tables 
@@ -583,7 +590,7 @@
 ### AWS Cost Anomaly Detection
 - **Key Features**:
   - Monitors AWS costs and usage to detect unusual spending patterns 
-  - Allows setting up monitors that analyze historical spending to identify cost anomalies 
+  - Allows setting up monitors that analyze historical spending to identify anomalies 
   - Notifies stakeholders through alerts (e.g., email or SNS) when unexpected spending is detected 
   - A proactive solution for monitoring costs without manual intervention 
 
@@ -634,7 +641,7 @@
 - **Enable EBS encryption by default** at the EC2 account attribute level to ensure all new volumes are encrypted (enhancing data security).  
 - **Use an Auto Scaling group** spanning multiple AZs with an **Application Load Balancer** to improve availability and automatically scale out/in based on demand.  
 - **Attach AWS WAF** to the ALB or CloudFront for web application protection against common exploits.  
-- **Use S3 Access Points** for granular access control to subsets of data in a shared S3 bucket (simplifies managing data access for multiple applications or tenants).  
+- **Use S3 Access Points** for granular access to subsets of data in a shared S3 bucket (simplifies managing data access for multiple applications or tenants).  
 - **Use S3 Event Notifications** + **Amazon SQS** + **AWS Lambda** to trigger short-lived image processing tasks without needing dedicated EC2 instances (serverless on-demand processing).  
 - **Amazon ECS + AWS Fargate** for scheduled container-based workloads (use EventBridge for cron-like scheduling of tasks without managing servers).  
 - **AWS Transit Gateway** is recommended for scaling to 100+ VPCs or large multi-account environments (simplifies network management with a hub-and-spoke model).  
@@ -731,4 +738,3 @@
   - Consider active-active multi-region architectures (using global databases like DynamoDB global tables or Aurora Global Database) 
   - Implement replication and health checks to enable instant failover across regions 
   - Active-active configurations validated for mission-critical applications.
-
