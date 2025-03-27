@@ -54,6 +54,10 @@
   - Can be configured to capture "before" and "after" images of modified items
 - **On-Demand Replicas**:
   - Provides read replicas (global tables) for global applications
+- **Time to Live (TTL)**:
+  - Automatically removes items after a specified time
+  - Reduces storage costs and overhead for cleaning up stale data
+  - Ideal for data with a known expiration requirement (e.g., 30 days)
 
 ### Amazon Neptune
 - **Use Cases**:
@@ -69,10 +73,10 @@
   - Migrating from Microsoft SQL Server to Amazon RDS for SQL Server provides a managed service with significantly reduced operational overhead
   - Allows automated database setup, maintenance, and scaling tasks
   - Provides managed backups, patching, and monitoring
-  - **Minimal-Change Migration from Oracle to Oracle on Amazon RDS**:
+  - **Minimal-Change Oracle Migrations**:
     - Use DMS to migrate from on-premises Oracle to Oracle on Amazon RDS
-    - Retains the same database engine, reducing application code changes
-    - Multi-AZ deployment offers high availability for the database layer
+    - Retains the same database engine for minimal code changes
+    - Multi-AZ RDS deployment ensures high availability
 
 ## Caching Services
 
@@ -102,6 +106,10 @@
   - Ideal for scenarios requiring strict message ordering and guaranteed single processing
 - **Dead Letter Queue**:
   - Stores messages that can't be processed (for example, by a Lambda function) for further analysis
+- **Decoupling for Resilience**:
+  - Use Amazon SNS and SQS to introduce a buffering layer between clients and backend processors (e.g., EC2 instances)
+  - If an EC2 instance fails, messages remain in the queue until another instance can process them
+  - Ensures a more resilient architecture that recovers automatically from component failures
 
 ## Container and Kubernetes Services
 
@@ -140,6 +148,9 @@
   - Easiest way to deploy and scale web applications developed in .NET, Java, PHP, Node.js, Python, Ruby, Go, or Docker
   - Automatically handles capacity provisioning, load balancing, and auto scaling
   - Provides a fully managed platform while still allowing customization of underlying resources
+  - **Multi-Environment & URL Swapping**:
+    - Create multiple environments for staging and production
+    - Use URL swapping (CNAME swap) to promote changes from staging to production with minimal downtime
   - **.NET on Windows Server**:
     - Supports deploying .NET applications with minimal code changes
     - Can be configured in a Multi-AZ setup for high availability
@@ -172,6 +183,10 @@
   - Permissions associated with this role control function's access to AWS resources
   - Best practice is to grant only necessary permissions following principle of least privilege
   - Can be configured with permissions to decrypt data using AWS KMS keys
+- **Accessing On-Premises Resources**:
+  - Configure Lambda to run in a private subnet of your VPC
+  - Ensure proper route via AWS Direct Connect or Site-to-Site VPN
+  - Assign appropriate security groups/NACLs so Lambda can communicate with on-prem resources
 
 ### AWS DataSync
 - **Primary Use**:
@@ -423,6 +438,9 @@
   - Can integrate with AWS WAF for security at the edge
   - Provides geographic restrictions (geo-blocking) to prevent users in specific locations from accessing content
   - Helps comply with distribution rights by restricting access based on user's location
+- **Field-Level Encryption and Signed URLs**:
+  - Use field-level encryption to protect sensitive data fields end to end
+  - Signed URLs or signed cookies can restrict access to private content
 
 ### Amazon VPC
 - **Internet Gateways**:
@@ -594,6 +612,20 @@
   - Use AWS Lambda for handling unpredictable request patterns (scales automatically)
   - Use DynamoDB for a fully managed NoSQL database with auto-scaling capabilities
   - Combine for a completely serverless architecture that scales with demand
+- **Hospital Scanning & Document Processing**:
+  - Store scanned documents in Amazon S3
+  - Use S3 event notifications to trigger a Lambda function
+  - Extract text with Amazon Textract or Amazon Rekognition (if images) and use Amazon Comprehend or Comprehend Medical for deeper analysis
+  - Query results with Amazon Athena for on-demand analytics
+- **Static + Dynamic Website**:
+  - Host static content in Amazon S3
+  - Use Amazon API Gateway + AWS Lambda for dynamic requests
+  - Store data in Amazon DynamoDB (on-demand capacity for unpredictable traffic)
+  - Use Amazon CloudFront to deliver the entire website for global low-latency access
+- **DynamoDB Accelerator (DAX)**:
+  - In-memory cache for DynamoDB
+  - Significantly improves read performance without major application rework (if using DAX client)
+  - Ideal for read-intensive workloads requiring microsecond response times
 
 ## High Availability Architectures
 - **For MySQL and stateless Python web applications**:
@@ -616,6 +648,12 @@
   - Configure Amazon Athena for SQL-based analysis of the data
   - Minimal operational overhead as both services are serverless and fully managed
   - Enables quick analysis for decision-making about further processing
+- **Document Ingestion and Transformation**:
+  - Store large volumes of documents in Amazon S3
+  - Use AWS Lambda triggers on object upload
+  - Perform OCR with Amazon Textract or Rekognition
+  - Use Amazon Comprehend (or Comprehend Medical) to extract relevant information
+  - Store extracted data in S3 or a database, queryable via Athena
 
 ## Resource Tagging and Cost Allocation
 - **AWS Lambda with EventBridge**:
@@ -634,8 +672,3 @@
     - **Long-running clusters**: Stay active continuously, less efficient for workloads with specific durations
     - **Primary node and core nodes on On-Demand Instances**: Ensures reliability for critical parts of the workload
     - **Task nodes on Spot Instances**: Cost-effective for compute-intensive portions of workload that can tolerate interruptions
-
-## Updates Made
-- Added **AWS Elastic Beanstalk** details under Compute Services, highlighting minimal rework for .NET applications in Multi-AZ.
-- Expanded **AWS DMS** section for Oracle-to-Oracle migrations with minimal code changes.
-- Content derived from the provided image indicating a .NET + Oracle scenario requiring minimal refactoring, high availability, and usage of Multi-AZ on both application (Elastic Beanstalk) and database (Amazon RDS).
