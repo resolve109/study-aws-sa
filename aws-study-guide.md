@@ -147,6 +147,10 @@
   - First-In-First-Out ordering to ensure messages are processed in order 
   - Exactly-once processing prevents duplicates 
   - Ideal for scenarios requiring strict message ordering and guaranteed single processing 
+  - Essential for systems like E-commerce applications that need to process orders in the exact sequence they were received
+  - Provides guaranteed ordering compared to SNS topics which cannot guarantee message sequence preservation
+  - Perfect for integration with API Gateway when sequential processing is critical
+  - More suitable than standard queues when the order of processing is a business requirement
 - **Message Retention**:
   - Messages are kept in queues for up to 14 days (4 days default) 
   - Allows delayed processing or retries without losing messages 
@@ -174,6 +178,19 @@
   - More effective than SNS for microservices that need to process data sequentially
   - Better solution than using Lambda functions or DynamoDB Streams for basic inter-service communication
   - Particularly useful when migrating from monolithic to microservices architectures
+
+### AWS Backup
+- **Cross-Region Backup**:
+  - Provides centralized, fully managed backup service across AWS services
+  - Can easily copy EC2 and RDS backups to a separate region
+  - Creates backup policies to automate backup tasks and enforce retention periods
+  - Ensures data is backed up to different regions for disaster recovery with minimal manual intervention
+  - Offers the least operational overhead compared to managing individual service backups
+  - More comprehensive than DLM for handling different AWS service backups
+  - Simpler than managing multiple manual snapshot processes and copies
+  - Can automate the entire backup workflow with far fewer manual steps than alternative approaches
+  - Ideal for long-term data retention requirements (e.g., 7 years) for compliance purposes
+  - More operationally efficient than custom scripts or manual backup processes for DynamoDB and other services
 
 ## Container and Kubernetes Services
 
@@ -206,6 +223,10 @@
   - Combined with ALB provides a scalable solution for breaking applications into smaller, independently managed services
   - Minimizes operational overhead through managed container orchestration
   - ALB ensures high availability and distributes traffic to containers based on demand
+  - Perfect solution for containerized workloads when breaking down monolithic applications
+  - Provides better container orchestration than EC2-based deployment for modernizing applications
+  - Allows preservation of front-end and back-end code while enabling decomposition into smaller components
+  - Reduces operational complexity when migrating from on-premises container environments
 
 ### Amazon EKS (Elastic Kubernetes Service)
 - **Key Features**:
@@ -297,6 +318,9 @@
 - **Data Transfer**:
   - **Snowball**: Physical devices to transfer large data volumes offline 
     - S3 Transfer Acceleration recommended for global data ingestion from multiple continents, combined with multipart upload to speed transfers.
+    - Turning on S3 Transfer Acceleration with multipart uploads is optimal for aggregating large data files (hundreds of GB) from global locations
+    - Leverages CloudFront's edge network to route data more efficiently to S3
+    - Provides faster transfer speeds without introducing operational complexity of multiple region buckets or physical transfer devices
 - **Encryption**:
   - **Client-Side Encryption**: Data is encrypted before upload (the client manages encryption) 
   - **Server-Side Encryption (SSE-S3)**: Amazon S3 manages encryption keys 
@@ -639,6 +663,8 @@
   - More effective for global content delivery than presigned URLs, cross-region replication, or Route 53 geoproximity
   - Securely delivers confidential media files with options for signed URLs/cookies for protected content
   - Offers significant performance advantages over accessing S3 buckets directly
+  - Essential for serving static content like event reports that will receive millions of global views
+  - The most efficient solution for globally distributing S3-hosted static websites with high traffic volume
 
 ### Amazon VPC
 - **Internet Gateways**:
