@@ -151,6 +151,8 @@
   - Provides guaranteed ordering compared to SNS topics which cannot guarantee message sequence preservation
   - Perfect for integration with API Gateway when sequential processing is critical
   - More suitable than standard queues when the order of processing is a business requirement
+  - Works well with API Gateway integrations to ensure commerce orders are processed in the exact sequence they are received
+  - Ensures all messages are processed in the order they arrive, unlike SNS topics which don't preserve message order
 - **Message Retention**:
   - Messages are kept in queues for up to 14 days (4 days default) 
   - Allows delayed processing or retries without losing messages 
@@ -191,6 +193,7 @@
   - Can automate the entire backup workflow with far fewer manual steps than alternative approaches
   - Ideal for long-term data retention requirements (e.g., 7 years) for compliance purposes
   - More operationally efficient than custom scripts or manual backup processes for DynamoDB and other services
+  - The most operationally efficient solution for maintaining long-term data retention such as DynamoDB tables that must be kept for 7+ years
 
 ## Container and Kubernetes Services
 
@@ -234,9 +237,12 @@
   - Lowers operational overhead for running upstream Kubernetes 
   - Integrates well with AWS networking, security, and scaling services 
   - EKS confirmed for providing managed Kubernetes with robust integration features.
+  - Perfect for migrating containerized workloads from on-premises Kubernetes environments
+  - Allows migration without code changes or deployment method modifications
+  - When paired with AWS Fargate and Amazon DocumentDB (with MongoDB compatibility), provides the least disruptive path for migrating MongoDB-based containerized applications
 - **Fargate for EKS**:
   - Combining EKS with Fargate can minimize overhead while running containerized workloads, if using Kubernetes.
-
+  
 ## Compute Services
 
 ### AWS Elastic Beanstalk
@@ -317,10 +323,13 @@
   - Storage classes have been confirmed to meet diverse performance and cost needs.
 - **Data Transfer**:
   - **Snowball**: Physical devices to transfer large data volumes offline 
-    - S3 Transfer Acceleration recommended for global data ingestion from multiple continents, combined with multipart upload to speed transfers.
+  - **S3 Transfer Acceleration**:
+    - Recommended for global data ingestion from multiple continents, combined with multipart upload to speed transfers
     - Turning on S3 Transfer Acceleration with multipart uploads is optimal for aggregating large data files (hundreds of GB) from global locations
     - Leverages CloudFront's edge network to route data more efficiently to S3
     - Provides faster transfer speeds without introducing operational complexity of multiple region buckets or physical transfer devices
+    - Most effective solution for aggregating data from global sites when minimizing operational complexity is a requirement
+    - Superior to using Snowball Edge or EC2-based solutions for regular transfers of moderate data volumes (e.g., 500GB per site)
 - **Encryption**:
   - **Client-Side Encryption**: Data is encrypted before upload (the client manages encryption) 
   - **Server-Side Encryption (SSE-S3)**: Amazon S3 manages encryption keys 
@@ -534,6 +543,8 @@
   - Provides 24×7 access to the AWS DDoS Response Team (DRT) for assistance during attacks
   - Offers protection against DDoS-related charges that might result from attacks
   - Particularly important for Network Load Balancers which cannot use AWS WAF directly
+  - Critical for protecting NLBs in API-driven cloud communication platforms against DDoS attacks
+  - Should be combined with AWS WAF on API Gateway for comprehensive protection of API architectures
 
 ### AWS IAM Identity Center (AWS Single Sign-On)
 - **Key Features**:
@@ -665,6 +676,7 @@
   - Offers significant performance advantages over accessing S3 buckets directly
   - Essential for serving static content like event reports that will receive millions of global views
   - The most efficient solution for globally distributing S3-hosted static websites with high traffic volume
+  - Perfect for serving daily static HTML reports expected to generate millions of views from users around the world
 
 ### Amazon VPC
 - **Internet Gateways**:
