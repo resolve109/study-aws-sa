@@ -65,6 +65,17 @@
   - Use a separate reader endpoint for your read queries 
   - Validated the use of reader endpoints to isolate read workloads.
 
+### Amazon Aurora Serverless v2
+- **Key Features**:
+  - Automatically scales database capacity based on application demand
+  - Provides fine-grained scaling that adjusts capacity in increments
+  - Ideal for handling unpredictable workloads like monthly sales events
+  - More cost-effective than provisioning for peak capacity as you only pay for what you use
+  - Particularly effective for applications with fluctuating database usage patterns
+  - Best solution for maintaining database performance during unexpected traffic increases
+  - Eliminates connection issues caused by database resource constraints
+  - Supports PostgreSQL compatibility with automatic scaling capabilities
+
 ### Amazon DynamoDB
 - **Key Features**:
   - Fully managed NoSQL database service 
@@ -195,6 +206,22 @@
   - Better solution than using Lambda functions or DynamoDB Streams for basic inter-service communication
   - Particularly useful when migrating from monolithic to microservices architectures
 
+### Amazon API Gateway
+- **Key Features**:
+  - Provides a fully managed service for creating, publishing, maintaining, monitoring, and securing APIs
+  - Can integrate with various AWS services including Lambda, DynamoDB, and Kinesis
+  - Supports REST and WebSocket APIs
+  - Offers features like request throttling, API keys, and monitoring
+  - Handles API versioning and different stages (dev, test, prod)
+- **Lambda Authorizers**:
+  - Provide custom authorization for API Gateway endpoints
+  - Enable authorization through a Lambda function
+  - Can validate tokens or perform complex authorization logic
+  - Particularly effective for applications with unpredictable traffic patterns
+  - When combined with Kinesis Data Firehose, creates a scalable solution for capturing and storing customer activity data
+  - More secure and flexible than authorization at load balancer or network level
+  - Ideal for web applications that need to capture analytics data with proper authorization
+
 ### AWS Backup
 - **Cross-Region Backup**:
   - Provides centralized, fully managed backup service across AWS services
@@ -276,6 +303,13 @@
   - More tailored to containerized environments than standard CloudWatch agents
   - Offers application-level insights without requiring custom instrumentation
   - Provides more container-aware monitoring than CloudTrail or AWS App Mesh
+- **EKS Connector**:
+  - Allows registering and connecting any conformant Kubernetes cluster to AWS
+  - Enables viewing all Kubernetes clusters (both AWS and on-premises) from a central location in the Amazon EKS console
+  - Provides a unified view of all connected clusters with minimal operational overhead
+  - More efficient than CloudWatch Container Insights or Systems Manager for centralized cluster management
+  - Purpose-built for viewing and connecting to Kubernetes clusters across different environments
+  - The most operationally efficient way to view all clusters and workloads from a central location
 
 ## Compute Services
 
@@ -330,6 +364,28 @@
   - Automatically scales to handle varying numbers of concurrent users
   - Can be triggered by S3 event notifications when new objects are uploaded
   - Efficient for serverless architectures requiring automatic scaling in response to workload demands
+
+### EC2 Instance Management
+- **Hibernation and Warm Pools**:
+  - EC2 hibernation preserves the in-memory state of an instance
+  - Allows faster restart by saving RAM contents to the EBS root volume
+  - Warm pools maintain a group of pre-initialized EC2 instances ready for quick use
+  - Significantly reduces application launch times for memory-intensive applications
+  - More effective than Capacity Reservations for reducing application startup time
+  - Better than simply launching additional instances which would still face the same startup delays
+  - Perfect for applications that take a long time to initialize or load large datasets into memory
+  - Can be combined with Auto Scaling for both fast startup and scalability
+
+### EC2 Placement Groups
+- **Spread Placement Group**:
+  - Places instances on distinct underlying hardware
+  - Reduces risk of simultaneous failures across instances
+  - Perfect for applications requiring high availability where instances should not share hardware
+  - Recommended for applications with a small number of critical instances that must be isolated
+  - More effective for hardware isolation than simply grouping instances in separate accounts
+  - Provides better isolation than dedicated tenancy which only separates from other customers
+  - Best practice for workloads processing large quantities of data in parallel with strict isolation requirements
+  - Ensures instances are distributed across different racks with separate power and network sources
 
 ### AWS DataSync
 - **Primary Use**:
@@ -851,6 +907,8 @@
   - Ideal for minimizing load times when hosting infrastructure in multiple geographic locations
   - Can be configured to route users based on continent, country, or US state
   - Different from latency-based routing which focuses on network performance rather than geographic location
+  - Perfect for hybrid infrastructure with both cloud and on-premises hosting in different geographic regions
+  - More effective than simple or weighted routing policies for globally distributed applications
 
 ## Data Analytics and Visualization
 
@@ -1128,3 +1186,14 @@
   - Allows organizations to move from self-managed MongoDB to a fully managed service while maintaining application compatibility
   - Supports existing MongoDB drivers and tools for smooth transition
   - Eliminates the operational overhead of managing database infrastructure
+
+### AWS Snowball with Tape Gateway
+- **Large Data Migration**:
+  - Ideal for migrating petabyte-scale tape data to AWS
+  - Overcomes bandwidth limitations with physical data transfer
+  - Snowball devices equipped with Tape Gateway functionality allow copying physical tapes to virtual tapes
+  - Most cost-effective solution for migrating huge archive data (e.g., 5 PB) within limited timeframes
+  - Virtual tapes can be archived to S3 Glacier Deep Archive for long-term retention
+  - Suitable for compliance requirements demanding data preservation for many years
+  - More efficient than solutions relying on internet transfers for massive datasets
+  - Creates a pathway for modernizing legacy tape infrastructure
