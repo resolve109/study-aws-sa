@@ -150,6 +150,11 @@
 - **Additional Update for Microservices**:
   - For microservices-based architectures transitioning from monolithic, SQS is recommended for asynchronous communication.
   - Confirms SQS improves decoupling and scalability.
+- **Event Handling**:
+  - Serves as an effective buffer for message processing during network failures
+  - When combined with SNS and Lambda, creates resilient data processing workflows
+  - Can be configured as an on-failure destination to preserve messages that fail initial processing
+  - Enables eventual processing of all messages without manual intervention
 
 ## Container and Kubernetes Services
 
@@ -281,6 +286,8 @@
 - **Static Website Hosting**:
   - You can host static websites on an S3 bucket 
   - Typically combined with Amazon CloudFront for edge caching 
+  - Provides a scalable, cost-effective solution for hosting websites with minimal operational overhead
+  - Eliminates the need to maintain and patch web servers or content management systems
 - **S3 Access Points**:
   - Provide separate custom-hosted endpoints with distinct access policies 
   - Simplify managing access to shared datasets 
@@ -409,6 +416,12 @@
   - Grant permission for a Lambda IAM role within the KMS key's policy to decrypt 
   - Directly associate Lambda's execution role with permissions to decrypt files 
   - Follow least privilege by granting only required decrypt permissions 
+- **Automatic Key Rotation**:
+  - Can be enabled for Customer Master Keys (CMKs)
+  - Eliminates manual intervention for key rotation
+  - Helps meet compliance requirements for encryption key usage
+  - Provides detailed key usage logging through integration with CloudTrail
+  - Ensures all keys are rotated in compliance with company policies
 
 ### AWS Secrets Manager
 - **Key Features**:
@@ -445,6 +458,14 @@
 - Helps protect web applications against common exploits (e.g., SQL injection, XSS) 
 - Can create custom rules to block or allow traffic based on attributes (e.g., IP, geolocation) 
 - Provides a robust solution for filtering web traffic and enforcing access rules 
+
+### AWS Shield Advanced
+- **Key Features**:
+  - Provides enhanced protection against Distributed Denial of Service (DDoS) attacks
+  - Offers additional detection and mitigation capabilities against large-scale and sophisticated DDoS attacks
+  - Can protect Amazon EC2 instances, Elastic Load Balancing, CloudFront distributions, and more
+  - Ensures website remains available during DDoS attacks
+  - Integrates with CloudFront for edge-based protection
 
 ### AWS IAM Identity Center (AWS Single Sign-On)
 - **Key Features**:
@@ -509,6 +530,11 @@
   - Enable private connections between a VPC and AWS services 
   - Use private IP addresses within your VPC to access services 
   - When combined with AWS Direct Connect, ensures data from on-premises to AWS doesn't traverse the public internet 
+- **VPC Endpoints**:
+  - Allow applications to access S3 buckets through a private network path within AWS
+  - Enable EC2 instances in private subnets to use AWS services without internet access
+  - Create a more secure solution for file transfers between applications and storage services
+  - Provide better security compared to using NAT gateways for S3 access
 
 ### AWS Transit Gateway
 - **Key Features**:
@@ -548,7 +574,7 @@
   - Can integrate with AWS WAF for security at the edge 
   - Provides geographic restrictions (geo-blocking) to prevent users in specific locations from accessing content 
   - Helps comply with content distribution rights by restricting access based on the user's location 
-- **Field-Level Encryption**:
+  - **Field-Level Encryption**:
   - Encrypts sensitive data fields at the edge (CloudFront) before forwarding to the origin 
   - Protects sensitive information throughout the application stack (only decrypted by the intended service with the private key) 
   - Adds an extra layer of security beyond standard HTTPS 
@@ -556,6 +582,12 @@
   - Restrict access to private content by requiring a signed URL or cookie (often with an expiration time) 
   - Commonly used to securely serve content to authorized users (e.g., subscriber-only videos or downloads) 
   - For high-speed, secure global distribution, use CloudFront with S3. S3 Transfer Acceleration can also help for uploads from remote locations.
+- **DDoS Protection**:
+  - Caches content at edge locations around the world, absorbing traffic before it reaches origin servers
+  - Helps mitigate DDoS attacks by distributing traffic across multiple edge locations
+  - Integrates with AWS Shield (including standard protection at no extra cost)
+  - Provides a global distribution network for both static and dynamic website content
+
 ### Amazon VPC
 - **Internet Gateways**:
   - A single Internet Gateway can route traffic for the entire VPC (across all AZs) 
@@ -567,12 +599,17 @@
   - Helps centrally manage allowed IP ranges across an organization 
   - Makes it easier to update and maintain security groups and route tables 
   - Can consolidate multiple security group rules (with different CIDRs but same port/protocol) into a single rule 
-  - **NAT Gateways**:
+- **NAT Gateways**:
   - Managed service provided by AWS allowing instances in private subnets to connect to the internet or other AWS services
   - Do not require patching, are automatically scalable, and provide built-in redundancy for high availability
   - Should be placed in different Availability Zones for fault tolerance
   - Replacing NAT instances with NAT gateways in different AZs ensures high availability and automatic scaling
   - Offers simplified management compared to self-managed NAT instances
+- **Private Subnets**:
+  - Provide enhanced security by isolating resources from direct internet access
+  - Can use VPC endpoints to connect to AWS services without traversing the internet
+  - Best practice for applications processing sensitive data (like medical records)
+  - Create a more secure network architecture for applications requiring S3 access
 
 ### Elastic Load Balancing
 - **Types of Load Balancers**:
@@ -754,11 +791,19 @@
   - Use Amazon API Gateway + AWS Lambda for dynamic requests (serverless backend). 
   - Store dynamic data in Amazon DynamoDB (on-demand capacity for unpredictable traffic). 
   - Use Amazon CloudFront to deliver the entire website globally with low latency.  
+  - Eliminates the need for patching and maintaining web servers
+  - Provides high availability, scalability, and enhanced security with minimal operational overhead
 - **DynamoDB Accelerator (DAX)**: 
   - In-memory cache for DynamoDB 
   - Significantly improves read performance (microsecond latency) without major application rework (just use the DAX client) 
   - Ideal for read-intensive workloads that require microsecond response times 
   - This update increases overall system responsiveness in high-traffic scenarios.
+- **AWS Shield Advanced + CloudFront**:
+  - Combined solution for protecting websites against DDoS attacks
+  - Shield Advanced provides enhanced protection against large-scale and sophisticated DDoS attacks
+  - CloudFront caches content at global edge locations, absorbing attack traffic before reaching origin servers
+  - Ensures websites remain available even during DDoS attacks
+  - CloudFront standard protection is included at no extra cost
 
 ## VPC Flow Logs and Monitoring
 - **VPC Flow Logs**:
@@ -821,13 +866,10 @@
   - Active-active configurations validated for mission-critical applications.
 
 ## Updates Made
-- Added **RDS Snapshot and Restore** information explaining the cost-effective approach for managing infrequently accessed databases
-- Added **ECS for Application Migration** detailing how it helps break monolithic applications into smaller microservices
-- Enhanced **AWS Lambda for Processing Images** section with specific details about image processing workflows with S3
-- Added details about **AWS DataSync with Direct Connect** for enhanced data transfer capabilities
-- Added **S3 Object Lock** information about compliance mode for regulatory requirements
-- Enhanced **FSx for Windows File Server** section with more details about Windows workload migration
-- Added **AWS Control Tower** for governance features and compliance requirements
-- Expanded **NAT Gateway** section with details about fault tolerance and advantages over NAT instances
-- Enhanced **Application Load Balancer** capabilities for detecting HTTP errors and improving application availability
-- Added details about **AWS Certificate Manager** for custom domain integration with API Gateway
+- Added **CloudFront DDoS Protection** details about how it helps mitigate DDoS attacks through global distribution
+- Enhanced **AWS Shield Advanced** section with details about DDoS protection capabilities
+- Added information about **Private Subnets** for securing applications that process sensitive data
+- Enhanced **VPC Endpoints** section with more details about secure access to S3 from private subnets
+- Added details about **Static Website Hosting** benefits for reducing operational overhead
+- Expanded **AWS Shield Advanced + CloudFront** as a combined solution for DDoS protection
+- Enhanced explanation of how the CloudFront CDN helps absorb attack traffic before it reaches origin servers
