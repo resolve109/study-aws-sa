@@ -200,6 +200,15 @@
 - **FSx for OpenZFS**:
  - For NFS-based Unix/Linux file workloads
  - Does not support SMB
+- **FSx for Lustre**:
+ - Fully managed file system optimized for compute-intensive workloads
+ - Designed for high-performance computing (HPC), machine learning, and media processing
+ - Available in scratch and persistent deployment types:
+   - Scratch: For temporary storage and shorter-term processing, data not replicated
+   - Persistent: For longer-term storage and throughput-focused workloads, data replicated within AZ
+ - Can seamlessly process data directly from S3
+ - Provides high levels of throughput, IOPS, and sub-millisecond latencies
+ - Enables thousands of compute instances to access data simultaneously
 
 ### Amazon Elastic File System (EFS)
 - **Key Features**:
@@ -214,6 +223,24 @@
  - "EBS encryption by default" can be configured at the **EC2 account attribute** level
    - Ensures all newly created EBS volumes are encrypted automatically
    - Prevents creation of unencrypted volumes
+- **Volume Types**:
+ - **General Purpose SSD (gp3)**: 
+   - Baseline performance of 3,000 IOPS and up to 16,000 IOPS
+   - Can provision IOPS independently of storage capacity
+   - Most cost-effective when specific IOPS requirements must be met
+   - Suitable for transactional workloads, virtual desktops, medium-sized databases
+ - **General Purpose SSD (gp2)**:
+   - IOPS performance linked directly to storage capacity
+   - Requires provisioning larger volume sizes to achieve higher IOPS
+   - Less cost-effective for specific IOPS requirements
+ - **Provisioned IOPS SSD (io1)**:
+   - Designed for I/O-intensive database workloads
+   - For workloads requiring sustained IOPS performance above 16,000 IOPS
+   - More expensive than gp3 for similar performance levels
+ - **Magnetic (Standard)**:
+   - Lowest per GB cost but does not support provisioning of IOPS
+   - Best suited for workloads with infrequently accessed data
+   - Cannot meet high IOPS requirements reliably or cost-effectively
 - **Snapshots**:
  - You can lock EBS snapshots to protect against accidental or malicious deletion
  - Locked snapshots can't be deleted by any user regardless of their IAM permissions
@@ -551,3 +578,21 @@
  - Lambda function queries databases for appropriate cost center information
  - Enables automatic tagging based on user who created the resource
  - Provides proactive and dynamic approach to resource tagging
+
+## Big Data Processing
+- **Amazon EMR (Elastic MapReduce)**:
+ - Industry-leading cloud big data platform for processing vast amounts of data
+ - Supports open source tools like Apache Spark, Apache Hive, Apache Flink
+ - Cluster configuration options for cost-optimization:
+   - **Transient clusters**: Terminated after completing tasks, most cost-effective for workloads with known duration
+   - **Long-running clusters**: Stay active continuously, less efficient for workloads with specific durations
+   - **Primary node and core nodes on On-Demand Instances**: Ensures reliability for critical parts of the workload
+   - **Task nodes on Spot Instances**: Cost-effective for compute-intensive portions of workload that can tolerate interruptions
+
+## Updates Made
+
+Added information about Amazon FSx for Lustre based on image 4, including its use cases for high-performance computing, deployment types (scratch vs. persistent), and performance characteristics.
+
+Added detailed information about Amazon EBS volume types based on images 2 and 3, including the benefits of General Purpose SSD (gp3) for provisioning IOPS independently of storage capacity, and comparisons with gp2, io1, and magnetic volumes.
+
+Added a new section on Amazon EMR (Elastic MapReduce) based on image 1, detailing cluster configuration options for cost optimization including transient vs. long-running clusters and strategic use of On-Demand vs. Spot Instances for different node types.
