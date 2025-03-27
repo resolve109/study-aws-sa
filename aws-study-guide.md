@@ -181,6 +181,14 @@
   - Supports more complex data structures (lists, sets, sorted sets, etc.) 
   - Provides persistence options, Pub/Sub functionality, and advanced features 
   - Redis features validated for applications needing complex data types and persistent caching.
+- **Gaming Leaderboards with Redis**:
+  - For near-real-time top-10 scoreboards in video games:
+    - Set up Amazon ElastiCache for Redis to compute and cache scores
+    - Use Redis sorted sets data structure to maintain leaderboards efficiently
+    - Leverage Redis persistence to enable game state preservation
+  - Offers better performance than RDS read replicas for scoreboard computation
+  - More suitable than Memcached which lacks sorted data structures and persistence
+  - Provides built-in functionality for leaderboards compared to custom CloudFront or RDS solutions
 
 ## Messaging and Queuing
 
@@ -256,6 +264,14 @@
     - Import the certificate into API Gateway and create a custom domain name
   - This provides the most operationally efficient way to manage individual secure customer URLs
   - Creating separate hosted zones or API endpoints for each customer introduces unnecessary complexity
+- **Accessing Private VPC Services**:
+  - To expose REST APIs that access backend services in private subnets:
+    - Design a REST API using Amazon API Gateway
+    - Host the backend application in Amazon ECS in a private subnet
+    - Create a private VPC link for API Gateway to access the ECS services
+  - More secure than using security groups to connect API Gateway to ECS
+  - Provides private connectivity without exposing backend services to the internet
+  - Supports REST API requirements better than WebSocket APIs for standard request-response patterns
 
 ### AWS Backup
 - **Cross-Region Backup**:
@@ -280,6 +296,18 @@
   - Can be configured to retain backups for multiple years to meet long-term compliance requirements
   - More restrictive than standard retention policies as it prevents override by administrators
   - Especially valuable for financial and healthcare data that must be preserved unchanged for regulatory purposes
+- **Disaster Recovery Implementation**:
+  - For Windows Server workloads on EC2 requiring cross-region disaster recovery with RPO of 24 hours:
+    - Create a backup vault using AWS Backup
+    - Create a backup plan for EC2 instances based on tag values
+    - Define the destination for the copy as another region (e.g., us-west-2)
+    - Specify the backup schedule to run twice daily
+  - Alternatively, create an Amazon EC2-backed AMI lifecycle policy with:
+    - Backups based on tags
+    - Schedule to run twice daily
+    - Automatic copy to the destination region
+  - Both options provide automated cross-region backup with minimal administrative effort
+  - More efficient than manually copying images or using Lambda functions for orchestration
 
 ## Container and Kubernetes Services
 
@@ -351,6 +379,13 @@
   - More secure than using the default EKS configuration without encryption
   - Required when handling sensitive information in Kubernetes secrets
   - Amazon EBS CSI driver add-ons do not address etcd secret encryption requirements
+- **Kubernetes Auto Scaling**:
+  - For scaling EKS clusters based on workload with minimal operational overhead:
+    - Use Kubernetes Metrics Server to activate horizontal pod autoscaling
+    - Implement Kubernetes Cluster Autoscaler to manage node count
+  - Metrics Server collects resource metrics from Kubelets for use by autoscalers
+  - Cluster Autoscaler adjusts the number of nodes based on pending pods and resource utilization
+  - More efficient than using Lambda functions, API Gateway, or App Mesh for scaling
 
 ## Compute Services
 
@@ -491,7 +526,7 @@
   - **S3 Glacier Deep Archive**: Lowest-cost storage for long-term archiving with retrieval times within 12 hours 
   - Storage classes have been confirmed to meet diverse performance and cost needs.
 - **Data Transfer**:
-  - **Snowball**: Physical devices to transfer large data volumes offline 
+- **Snowball**: Physical devices to transfer large data volumes offline 
   - **S3 Transfer Acceleration**:
     - Recommended for global data ingestion from multiple continents, combined with multipart upload to speed transfers
     - Turning on S3 Transfer Acceleration with multipart uploads is optimal for aggregating large data files (hundreds of GB) from global locations
@@ -547,6 +582,61 @@
   - This approach directly addresses security concerns by making deletion of documents more secure, requiring a physical MFA device to confirm such actions
 - - **Data Transfer**:
   - **Snowball**: Physical devices to transfer large data volumes offline 
+  - **S3 Transfer Acceleration**:
+    - Recommended for global data ingestion from multiple continents, combined with multipart upload to speed transfers
+    - Turning on S3 Transfer Acceleration with multipart uploads is optimal for aggregating large data files (hundreds of GB) from global locations
+    - Leverages CloudFront's edge network to route data more efficiently to S3
+    - Provides faster transfer speeds without introducing operational complexity of multiple region buckets or physical transfer devices
+    - Most effective solution for aggregating data from global sites when minimizing operational complexity is a requirement
+    - Superior to using Snowball Edge or EC2-based solutions for regular transfers of moderate data volumes (e.g., 500GB per site)
+- **Encryption**:
+  - **Client-Side Encryption**: Data is encrypted before upload (the client manages encryption) 
+  - **Server-Side Encryption (SSE-S3)**: Amazon S3 manages encryption keys 
+  - **Server-Side Encryption with AWS KMS (SSE-KMS)**: Uses AWS KMS for key management 
+  - **Server-Side Encryption with Customer-Provided Keys (SSE-C)**: Customer provides the encryption keys 
+- **Static Website Hosting**:
+  - You can host static websites on an S3 bucket 
+  - Typically combined with Amazon CloudFront for edge caching 
+  - Provides a scalable, cost-effective solution for hosting websites with minimal operational overhead
+  - Eliminates the need to maintain and patch web servers or content management systems
+- **S3 Access Points**:
+  - Provide separate custom-hosted endpoints with distinct access policies 
+  - Simplify managing access to shared datasets 
+- **Multi-Region Access Points**:
+  - Active-active S3 configuration with a single global endpoint 
+  - Intelligent routing to the closest bucket for performance 
+  - Supports S3 Cross-Region Replication for durability and failover 
+- **S3 Storage Lens**:
+  - Cloud-storage analytics feature for organization-wide visibility into object storage and activity 
+  - Analyzes metrics to deliver contextual recommendations for optimizing storage costs 
+  - Can identify buckets that don't have S3 Lifecycle rules to abort incomplete multipart uploads 
+  - Helps identify cost-optimization opportunities and implement data-protection best practices 
+  - Provides dashboards and metrics directly within AWS Management Console without custom configuration 
+  - For large data ingestion from global sites, **S3 Transfer Acceleration** can significantly reduce upload latencies.
+  - Most effective solution for aggregating data from global sites when minimizing operational complexity is a requirement
+  - Provides faster transfer speeds without introducing operational complexity of multiple region buckets or physical transfer devices
+  - When combined with multipart uploads, is optimal for aggregating large data files (hundreds of GB) from global locations
+  - Superior to using Snowball Edge or EC2-based solutions for regular transfers of moderate data volumes (e.g., 500GB per site)
+  - Leverages CloudFront's edge network to route data more efficiently to S3
+- **Versioning & MFA Delete**:
+  - Enable versioning and MFA delete to add extra protection against accidental/malicious deletions of objects.
+  - Validated best practice for critical data.
+  - When an object is deleted from a versioned bucket, a delete marker is placed on the current version, while older versions remain, enabling recovery of the prior version.
+  - Versioning in S3 keeps multiple variants of an object in the same bucket
+  - With versioning, you can preserve, retrieve, and restore every version of every object stored
+  - After versioning is enabled, if S3 receives multiple write requests for the same object simultaneously, it stores all of those objects
+  - MFA Delete requires the bucket owner to include two forms of authentication in any request to delete a version or change the versioning state
+  - MFA Delete provides additional authentication for: changing the versioning state of your bucket and permanently deleting an object version
+  - While bucket policies can restrict access based on conditions, they don't directly protect against accidental deletion like versioning and MFA Delete do
+  - Default encryption ensures objects are encrypted at rest but doesn't protect against deletion
+  - Lifecycle policies help manage objects and storage costs but don't protect against accidental deletion
+  - The combination of versioning and MFA Delete is a more effective protection strategy than bucket policies, default encryption, or lifecycle policies alone
+  - Versioning-enabled buckets allow you to recover from both unintended user actions and application failures
+  - Most effective combination for protecting sensitive audit documents and confidential information
+  - For confidential audit documents, combining versioning and MFA Delete provides the most secure protection against accidental or malicious deletion IF complianc mode isn't sufficient, however compliance mode is the best option for regulatory compliance
+  - This approach directly addresses security concerns by making deletion of documents more secure, requiring a physical MFA device to confirm such actions
+- - **Data Transfer**:
+- **Snowball**: Physical devices to transfer large data volumes offline 
   - **S3 Transfer Acceleration**:
     - Recommended for global data ingestion from multiple continents, combined with multipart upload to speed transfers
     - Turning on S3 Transfer Acceleration with multipart uploads is optimal for aggregating large data files (hundreds of GB) from global locations
@@ -681,6 +771,15 @@ Amazon FSx
   - Multi-AZ deployments provide higher resilience than Single-AZ for business-critical applications
   - When RPO of minutes is required, should use Multi-AZ deployment with frequent backups scheduled through AWS Backup
   - Can replicate file systems to other regions to protect against regional outages or for disaster recovery
+  - **Preserving File Permissions**:
+    - To migrate and consolidate Windows file servers while preserving permissions:
+      - Deploy AWS DataSync agents on-premises
+      - Schedule DataSync tasks to transfer data to FSx for Windows File Server
+      - Alternatively, order AWS Snowcone for large migrations
+      - Launch DataSync agents on the Snowcone device for efficient transfer
+    - DataSync preserves NTFS permissions during migration
+    - More effective than using S3 as an intermediate storage
+    - Better than shipping drives or using Snowball Edge with S3 import
 - **FSx for OpenZFS**:
   - For NFS-based Unix/Linux file workloads 
   - Does not support SMB 
@@ -750,10 +849,17 @@ Amazon FSx
   - Retains backups as required by auditors or internal compliance 
   - Reduces storage costs by deleting outdated backups 
   - Can create disaster recovery backup policies that back up data to isolated regions or accounts 
+- **GP3 Volume Advantages**:
+  - Allows provisioning disk performance (IOPS) independent of storage capacity
+  - Provides baseline performance of 3,000 IOPS at any volume size
+  - Can scale up to 16,000 IOPS with additional cost
+  - Most cost-effective option for workloads requiring up to 16,000 IOPS
+  - More efficient than io1/io2 volumes for similar performance requirements
+  - Better choice than GP2 when specific IOPS requirements must be met
 
 ### AWS Transfer Family
 - **SFTP Solution with EFS**:
-  - For implementing a serverless high-IOPS SFTP service:
+  - For implementing a serverless high-IOPS SFTP solution:
     - Create an encrypted Amazon EFS volume 
     - Create an AWS Transfer Family SFTP service with elastic IP addresses and a VPC endpoint
     - Attach a security group that allows only trusted IP addresses
@@ -762,6 +868,11 @@ Amazon FSx
   - More suitable for high IOPS workloads than S3-based solutions
   - Offers better throughput for file systems requiring high performance
   - Allows maintaining control over user permissions with the same serverless benefits
+- **AS2 Protocol Support**:
+  - Supports Applicability Statement 2 (AS2) protocol for secure file transfers
+  - Can be integrated with custom identity providers through AWS Lambda functions
+  - Provides secure and reliable transfer of data over the Internet
+  - More suitable for AS2 protocol requirements than DataSync, AppFlow, or Storage Gateway
 
 ## Security and Identity Services
 
@@ -943,7 +1054,17 @@ Amazon FSx
   - This approach aligns with security best practices by ensuring users have only the permissions necessary for their job functions
   - More effective for departmental permission management than using SCPs or permissions boundaries
   - IAM roles are intended for delegation scenarios, not for direct attachment to IAM groups
-  - For cross-account or service-based permissions, roles are more appropriate than group-based policies
+  - For cross-account or service-based permissions, roles are more appropriate than group-based polici- **Identity-Based Policies**:
+  - Can be attached to:
+    - IAM roles
+    - IAM groups
+  - Cannot be directly attached to:
+    - AWS Organizations (which use Service Control Policies instead)
+    - Amazon ECS resources (which use IAM roles for tasks)
+    - Amazon EC2 resources (which use instance profiles/roles)
+  - Understanding proper policy attachment points helps ensure effective permission management
+  - Following this guidance helps maintain proper security boundaries between service roles
+es
 - **Identity-Based Policies**:
   - Can be attached to:
     - IAM roles
@@ -954,6 +1075,15 @@ Amazon FSx
     - Amazon EC2 resources (which use instance profiles/roles)
   - Understanding proper policy attachment points helps ensure effective permission management
   - Following this guidance helps maintain proper security boundaries between service roles
+- **Secure DynamoDB Access Across Accounts**:
+  - For a central application to access DynamoDB tables in multiple accounts:
+    - Create an IAM role in each business account with DynamoDB access permissions
+    - Configure trust policies to allow specific roles from the central account
+    - Create an application role in the central account with AssumeRole permissions
+    - Configure the application to use STS AssumeRole to access cross-account resources
+  - More secure than using IAM users with access keys
+  - More appropriate than using Secrets Manager or Certificate Manager
+  - Follows IAM best practices for cross-account access
 
 ## Networking and Content Delivery
 
@@ -996,6 +1126,15 @@ Amazon FSx
   - Simpler than Site-to-Site VPN which introduces unnecessary complexity and additional costs
   - Not suited for Direct Connect which is designed for connecting on-premises networks to AWS
   - Requires updating route tables in each VPC to use the peering connection for inter-VPC communication
+- **Expanding VPC Address Space**:
+  - To resolve insufficient IP addresses in a VPC with minimal operational overhead:
+    - Add an additional IPv4 CIDR block to the existing VPC
+    - Create additional subnets using the new CIDR range
+    - Place new resources in the new subnets
+  - This approach is more efficient than:
+    - Creating a second VPC with peering connection
+    - Using Transit Gateway to connect multiple VPCs
+    - Setting up VPN connections between VPCs
 
 ### AWS PrivateLink
 - **Overview**:
@@ -1025,6 +1164,14 @@ Amazon FSx
   - Ideal for large multi-VPC or multi-account architectures 
   - Simplifies routing and management at scale 
   - Confirmed as an effective solution for centralizing network management.
+- **Multi-Region VPC Communication**:
+  - For connecting VPCs across all regions with minimal administrative effort:
+    - Use AWS Transit Gateway for VPC communication within a single region
+    - Implement Transit Gateway peering across regions for cross-region communication
+  - This provides centralized management of interconnections
+  - Significantly reduces complexity compared to managing individual VPC peering connections
+  - More scalable than VPC peering for environments with many VPCs
+  - More efficient than using Direct Connect gateways or AWS PrivateLink for VPC-to-VPC connectivity
 
 ### AWS Direct Connect
 - **Redundancy Best Practices**:
@@ -1484,3 +1631,21 @@ Amazon FSx
   - Suitable for compliance requirements demanding data preservation for many years
   - More efficient than solutions relying on internet transfers for massive datasets
   - Creates a pathway for modernizing legacy tape infrastructure
+
+### Machine Learning Solutions
+- **AI for Call Analysis**:
+  - To analyze customer service calls in multiple languages:
+    - Use Amazon Transcribe to convert audio recordings into text in various languages
+    - Use Amazon Translate to translate the text into a standard language (e.g., English)
+    - Use Amazon Comprehend for sentiment analysis and report generation
+  - This combination provides automated multilingual support without maintaining ML models
+  - More effective than using Amazon Lex, Polly, or custom solutions
+
+### Network Redundancy
+- **Eliminating Single Points of Failure**:
+  - For Management VPC connected to on-premises via VPN:
+    - Add a second set of VPNs from a second customer gateway device
+    - This provides redundancy for the on-premises connection
+  - More effective than adding a second virtual private gateway to the VPC
+  - Better than adding redundant VPC peering or VPNs between VPCs
+  - Addresses the specific single point of failure in the customer gateway
