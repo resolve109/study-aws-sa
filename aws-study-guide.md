@@ -33,6 +33,11 @@
 - **Additional Update for Serverless:**  
   - In architectures using AWS Lambda, using RDS Proxy is essential to reduce connection overhead.
   - Serverless use of RDS Proxy has been validated to improve performance.
+- **Snapshot and Restore**:
+  - Creating a snapshot of an RDS instance after testing and terminating it is a cost-effective approach for infrequently used databases
+  - Restore from snapshot when needed for the next test cycle
+  - Significantly reduces costs for databases that are only needed periodically (e.g., monthly testing)
+  - More cost-efficient than keeping the instance running continuously or modifying instance types repeatedly
 
 ### Amazon Aurora
 - **Overview**:
@@ -172,6 +177,11 @@
 - **Load Balancing**:
   - Typically use Application Load Balancer (ALB) for HTTP/HTTPS traffic 
   - Network Load Balancer (NLB) can be used for TCP/UDP pass-through 
+- **Application Migration**:
+  - Ideal for migrating monolithic applications to microservices
+  - Combined with ALB provides a scalable solution for breaking applications into smaller, independently managed services
+  - Minimizes operational overhead through managed container orchestration
+  - ALB ensures high availability and distributes traffic to containers based on demand
 
 ### Amazon EKS (Elastic Kubernetes Service)
 - **Key Features**:
@@ -206,7 +216,7 @@
 - Often combined with Amazon EventBridge for scheduled tasks 
 - Better suited for applications that require more granular control over environments and longer running processes 
 - More cost-effective than EC2-based solutions for infrequent or sporadic workloads 
-- Fargate’s cost-effectiveness and operational simplicity have been validated.
+- Fargate's cost-effectiveness and operational simplicity have been validated.
 
 ### AWS Lambda
 - **Key Constraints**:
@@ -230,12 +240,23 @@
   - Ensure proper route via AWS Direct Connect or Site-to-Site VPN 
   - Assign appropriate security groups/NACLs so Lambda can communicate with on-prem resources 
   - Verified secure VPC integration for accessing on-premises systems.
+- **Processing Images**:
+  - Ideal for processing user-uploaded images stored in S3
+  - Automatically scales to handle varying numbers of concurrent users
+  - Can be triggered by S3 event notifications when new objects are uploaded
+  - Efficient for serverless architectures requiring automatic scaling in response to workload demands
 
 ### AWS DataSync
 - **Primary Use**:
   - Automates data transfers between on-premises storage and AWS or between different AWS storage services 
 - **Not** for running data analysis jobs or containerized workloads 
 - Confirmed use of DataSync for efficient bulk data transfers.
+- **Enhanced Data Transfer**:
+  - Provides a secure and reliable method for transferring large volumes of data
+  - Can be used in conjunction with AWS Direct Connect for dedicated network connection
+  - Offers higher throughput and security compared to transfers over public internet
+  - Particularly suited for transferring instrumentation data (JSON files) to S3
+  - Minimizes risk of data exposure and provides dedicated network connection
 
 ## Storage Services
 
@@ -277,6 +298,12 @@
 - **Versioning & MFA Delete**:
   - Enable versioning and MFA delete to add extra protection against accidental/malicious deletions of objects.
   - Validated best practice for critical data.
+- **S3 Object Lock**:
+  - Enables write-once-read-many (WORM) protection for S3 objects
+  - Compliance mode prevents objects from being deleted or modified by anyone including root users
+  - Can set retention periods (e.g., 365 days) to meet regulatory requirements
+  - Ideal for medical data, financial records, and other information requiring immutability
+  - Ensures regulatory compliance for data that cannot be modified or deleted
 
 ### Amazon FSx
 - **FSx for NetApp ONTAP**:
@@ -293,6 +320,11 @@
 - **FSx for Windows File Server**:
   - Uses SMB protocol for Windows-based file shares 
   - Recommended for Windows-based applications needing shared file systems across multiple AZs.
+  - Provides a fully managed native Microsoft Windows file system
+  - Ideal for migrating Windows file shares to AWS while maintaining the same access methods
+  - Supports Multi-AZ configuration for high availability and durability
+  - Eliminates the need to manually synchronize data between EC2 instances
+  - Preserves the way users access files through Windows file shares
 - **FSx for OpenZFS**:
   - For NFS-based Unix/Linux file workloads 
   - Does not support SMB 
@@ -429,6 +461,11 @@
   - Supports automatic certificate renewal 
   - Integrates with AWS services like CloudFront and Application Load Balancer 
   - Provides an easy way to implement HTTPS for websites and applications 
+- **Custom Domain Integration**:
+  - Can be used to secure custom domain names for API Gateway endpoints
+  - Certificates should be imported into ACM in the same region as the API Gateway endpoint
+  - Enables HTTPS communications for third-party services consuming APIs
+  - Provides certificate management for secure API URLs using company domain names
 
 ### AWS Organizations
 - **Key Features**:
@@ -439,6 +476,19 @@
   - Simplify billing by using a single payment method for all accounts 
   - Manage tag policies that specify allowed/disallowed tag keys and values 
   - Enforce tag policies to standardize tags across resources in the organization 
+- **Compliance Controls**:
+  - Implement data residency guardrails to deny access to specific regions
+  - Use Service Control Policies (SCPs) to prevent VPCs from gaining internet access
+  - Enforce region-specific restrictions for regulatory compliance
+  - Centrally manage policies across multiple AWS accounts
+
+### AWS Control Tower
+- **Governance Features**:
+  - Implements governance at scale across AWS accounts
+  - Can enforce data residency guardrails for compliance requirements
+  - Restricts operations to specific AWS Regions
+  - Creates a secure and compliant environment while maintaining network isolation
+  - Helps meet regulatory requirements for data handling and access
 
 ### Identity Federation
 - **SAML 2.0-based Federation**:
@@ -446,7 +496,7 @@
   - Leverages existing AD identities to authenticate to AWS 
   - Maps AD groups to AWS IAM roles for permission management 
   - Minimizes administrative overhead by maintaining a single identity source 
-  - Users don’t need separate AWS credentials to access AWS resources 
+  - Users don't need separate AWS credentials to access AWS resources 
 
 ## Networking and Content Delivery
 
@@ -473,6 +523,12 @@
   - For mission-critical workloads, use multiple connections at separate locations/devices 
   - Ensure path and device redundancy from each data center (to mitigate single points of failure) 
   - Validated the importance of multiple connections for high availability.
+- **Data Transfer Benefits**:
+  - Provides a dedicated network connection from on-premises to AWS
+  - Offers more reliable and consistent network experience than internet-based connections
+  - Reduces bandwidth limitations and improves performance for large data transfers
+  - Ideal for transferring time-sensitive data to Amazon S3
+  - Separates backup traffic from regular internet usage to minimize impact on users
 
 ### AWS Global Accelerator
 - **Key Features**:
@@ -511,6 +567,12 @@
   - Helps centrally manage allowed IP ranges across an organization 
   - Makes it easier to update and maintain security groups and route tables 
   - Can consolidate multiple security group rules (with different CIDRs but same port/protocol) into a single rule 
+  - **NAT Gateways**:
+  - Managed service provided by AWS allowing instances in private subnets to connect to the internet or other AWS services
+  - Do not require patching, are automatically scalable, and provide built-in redundancy for high availability
+  - Should be placed in different Availability Zones for fault tolerance
+  - Replacing NAT instances with NAT gateways in different AZs ensures high availability and automatic scaling
+  - Offers simplified management compared to self-managed NAT instances
 
 ### Elastic Load Balancing
 - **Types of Load Balancers**:
@@ -527,6 +589,10 @@
   - Monitors the health of targets and only routes traffic to healthy ones 
   - Supports multi-AZ deployments for high availability 
   - Can integrate with Auto Scaling groups to scale the target fleet as traffic changes 
+  - Designed to work with HTTP and HTTPS traffic, allowing for advanced routing decisions
+  - Can perform health checks based on HTTP response content to detect application-level errors
+  - Automatically removes unhealthy instances from the target group
+  - When combined with Auto Scaling, can replace unhealthy instances to maintain application availability
 
 ## Data Analytics and Visualization
 
@@ -577,6 +643,11 @@
   - Provides a managed Spark environment to run ETL jobs 
   - Integrates with Athena for serverless querying of data 
   - Glue crawlers can automatically create or update the metadata catalog for data in S3 
+- **Data Processing Workflow**:
+  - Can be used to catalog clickstream data in S3 making it queryable
+  - Works with Athena to enable SQL-based analysis without managing infrastructure
+  - Provides serverless, minimal-overhead solution for analyzing data stored in S3
+  - Creates schema-on-read capabilities for JSON and other semi-structured data
 
 ## Encryption and Data Protection
 
@@ -588,7 +659,7 @@
 
 ### S3 Bucket Encryption
 - **Client-Side Encryption**:
-  - Data is encrypted on the client side before uploading to S3 
+  - Data is encrypted before upload (the client manages encryption) 
   - Provides encryption in transit and at rest (since it's encrypted when stored) 
 - **Server-Side Encryption**:
   - **SSE-S3**: S3 handles key management and encryption for you 
@@ -631,7 +702,7 @@
 - **Key Features**:
   - Securely share AWS resources across AWS accounts 
   - Share resources within your organization or organizational units (OUs) in AWS Organizations 
-  - Supports sharing of transit gateways, subnets, license manager configurations, Route 53 Resolver rules, and more 
+  - Supports sharing of transit gateways, subnets, license manager configurations, Route 53 Resolver rules, and more 
   - Reduces operational overhead of duplicating resources in multiple accounts 
   - Enables sharing of customer-managed prefix lists across accounts (for consistent network ACLs and security groups) 
 
@@ -742,7 +813,7 @@
   - Confirmed as the preferred architecture for high availability.
 - **For Global Applications Needing Multi-Region Redundancy**:
   - Deploy workload components in a secondary region (including data stores and compute) 
-  - Use Route 53 or AWS Global Accelerator to route users to the nearest healthy endpoint or fail over if a region goes down 
+  - Use Route 53 or AWS Global Accelerator to route users to the nearest healthy endpoint or fail over if a region goes down 
   - Verified multi-region designs to maintain global availability.
 - **For Applications Requiring Zero Downtime and No Data Loss**:
   - Consider active-active multi-region architectures (using global databases like DynamoDB global tables or Aurora Global Database) 
@@ -750,22 +821,13 @@
   - Active-active configurations validated for mission-critical applications.
 
 ## Updates Made
-- **DynamoDB TTL:** Added TTL details to clarify auto-deletion of expired items, reducing storage costs.
-- **DAX:** Included DynamoDB Accelerator (DAX) details for enhancing DynamoDB read performance.
-- **SQS Enhancements:** Expanded message retention and dead letter queue details to emphasize resiliency.
-- **EventBridge Usage:** Detailed the use of EventBridge for capturing AWS API events and triggering automated actions.
-- **CloudFront Security:** Added field-level encryption and signed URLs/cookies sections for enhanced content protection.
-- **Document Processing:** Inserted best practices for hospital scanning and document processing using Textract/Rekognition and Comprehend.
-- **Website Deployment:** Enhanced static + dynamic website deployment patterns with S3, API Gateway, Lambda, DynamoDB, and CloudFront.
-- Merged all correct answer details (marked in green in the screenshots) into additional bullet points across multiple sections, increasing the overall file line count.
-- **New Updates:** 
-  - Added a bullet for **FSx for Windows File Server** as the recommended solution for shared Windows file systems across multiple AZs.
-  - Included guidance to use ECS with the EC2 launch type for dynamic container workloads requiring specialized hardware.
-  - Recommended SQS for asynchronous communication in microservices-based architectures.
-  - Highlighted the use of RDS Proxy with Lambda in serverless architectures.
-  - **S3 Transfer Acceleration** recommended for faster global data ingestion into S3.
-  - **S3 Versioning + MFA Delete** for protecting confidential data from accidental or malicious deletion.
-  - **AWS Backup** recommended for managing DynamoDB backups and retention for compliance (7+ years).
-  - **SQS FIFO** recommended for ensuring First-In-First-Out message ordering behind API Gateway in certain e-commerce scenarios.
-  - **ECS + ALB** for containerized monolithic migrations with minimal changes.
-
+- Added **RDS Snapshot and Restore** information explaining the cost-effective approach for managing infrequently accessed databases
+- Added **ECS for Application Migration** detailing how it helps break monolithic applications into smaller microservices
+- Enhanced **AWS Lambda for Processing Images** section with specific details about image processing workflows with S3
+- Added details about **AWS DataSync with Direct Connect** for enhanced data transfer capabilities
+- Added **S3 Object Lock** information about compliance mode for regulatory requirements
+- Enhanced **FSx for Windows File Server** section with more details about Windows workload migration
+- Added **AWS Control Tower** for governance features and compliance requirements
+- Expanded **NAT Gateway** section with details about fault tolerance and advantages over NAT instances
+- Enhanced **Application Load Balancer** capabilities for detecting HTTP errors and improving application availability
+- Added details about **AWS Certificate Manager** for custom domain integration with API Gateway
