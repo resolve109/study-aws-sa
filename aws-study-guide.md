@@ -418,6 +418,10 @@
   - Supports Multi-AZ configuration for high availability and durability
   - Eliminates the need to manually synchronize data between EC2 instances
   - Preserves the way users access files through Windows file shares
+  - Provides built-in integration with Microsoft Active Directory for authentication and access control
+  - Specifically designed for Microsoft Windows-based workloads like SharePoint that require Windows-native file system features
+  - Perfect for migrations of on-premises SharePoint deployments requiring shared file storage
+  - Superior to other storage options like EFS (which uses NFS protocol) for Windows workloads
 - **FSx for OpenZFS**:
   - For NFS-based Unix/Linux file workloads 
   - Does not support SMB 
@@ -571,10 +575,6 @@
   - Critical for protecting NLBs in API-driven cloud communication platforms against DDoS attacks
   - Should be combined with AWS WAF on API Gateway for comprehensive protection of API architectures
 
-##- Particularly important for Network Load Balancers which cannot use AWS WAF directly
-  - Critical for protecting NLBs in API-driven cloud communication platforms against DDoS attacks
-  - Should be combined with AWS WAF on API Gateway for comprehensive protection of API architectures  
-  
 ### AWS IAM Identity Center (AWS Single Sign-On)
 - **Key Features**:
   - Centrally manage SSO access to multiple AWS accounts and business applications 
@@ -731,10 +731,12 @@
   - A VPC can only have one internet gateway attached at any time
   - Egress-only internet gateways are specifically designed for outbound-only IPv6 traffic, not for IPv4 traffic
 - **Security Groups**:
-  - For bastion host setups, configure the security group of the bastion host to only allow inbound access from the company's external IP range
-  - For application instances in private subnets, configure security groups to allow inbound SSH access only from the private IP address of the bastion host
-  - When configuring multi-tier applications, web tier should allow inbound traffic on port 443 from 0.0.0.0/0 (for HTTPS)
-  - For database tiers, restrict inbound traffic to only the specific database port (e.g., 1433 for SQL Server) from the web tier's security group
+  - For bastion host setups, the security group of the bastion host should only allow inbound access from the external IP range of the company
+  - For application instances in private subnets, the security group should allow inbound SSH access only from the private IP address of the bastion host
+  - This configuration ensures that only connections from company locations can reach the bastion host, and only the bastion host can access application servers
+  - For web tiers in multi-tier architectures, configure the security group to allow inbound traffic on port 443 from 0.0.0.0/0 (HTTPS from the internet)
+  - For database tiers, configure the security group to allow inbound traffic only on the specific database port (e.g., 1433 for SQL Server) from the web tier's security group
+  - These configurations follow the principle of least privilege and enhance overall security posture
 
 ### Elastic Load Balancing
 - **Types of Load Balancers**:
@@ -760,6 +762,9 @@
   - Deploys in an inspection VPC to analyze traffic before it reaches application servers
   - Gateway Load Balancer endpoints receive incoming packets and forward them to security appliances
   - Provides the least operational overhead for implementing traffic inspection with third-party appliances
+  - Makes it easy to deploy, scale, and manage third-party virtual appliances like firewalls
+  - Enables transparent network traffic inspection without complex routing configurations
+  - Simplifies integration of security appliances from AWS Marketplace into existing architectures
 
 ## Data Analytics and Visualization
 
