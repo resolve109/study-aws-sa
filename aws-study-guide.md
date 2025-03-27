@@ -25,6 +25,10 @@
   - Handles unpredictable surges in database traffic and prevents oversubscription 
   - Queues or throttles application connections that can't be served immediately, helping applications scale without overwhelming databases 
   - Confirmed the importance of RDS Proxy in reducing failover times and managing connection pools.
+  - Particularly effective for serverless applications using Lambda that may create many database connections
+  - Acts as an intermediary layer that sits between applications and databases to manage connection pools
+  - Significantly reduces timeouts during sudden traffic surges by efficiently managing database connections
+  - Addresses issues of high CPU and memory utilization caused by large numbers of open connections
 - **Read Replicas**:
   - Read-only copy of a DB instance 
   - Reduces load on primary DB instance by routing queries to the read replica 
@@ -161,6 +165,15 @@
   - When combined with SNS and Lambda, creates resilient data processing workflows
   - Can be configured as an on-failure destination to preserve messages that fail initial processing
   - Enables eventual processing of all messages without manual intervention
+- **Microservices Communication**:
+  - Ideal for decoupling components in microservices architectures
+  - Perfect for sequential data processing where order of results is not important
+  - Allows producer and consumer services to scale independently
+  - Provides reliable, highly scalable hosted message queuing
+  - Enables asynchronous communication between microservices
+  - More effective than SNS for microservices that need to process data sequentially
+  - Better solution than using Lambda functions or DynamoDB Streams for basic inter-service communication
+  - Particularly useful when migrating from monolithic to microservices architectures
 
 ## Container and Kubernetes Services
 
@@ -320,6 +333,8 @@
   - While bucket policies can restrict access based on conditions, they don't directly protect against accidental deletion like versioning and MFA Delete do
   - Default encryption ensures objects are encrypted at rest but doesn't protect against deletion
   - Lifecycle policies help manage objects and storage costs but don't protect against accidental deletion
+  - The combination of versioning and MFA Delete is a more effective protection strategy than bucket policies, default encryption, or lifecycle policies alone
+  - Versioning-enabled buckets allow you to recover from both unintended user actions and application failures
 - **S3 Object Lock**:
   - Enables write-once-read-many (WORM) protection for S3 objects
   - Compliance mode prevents objects from being deleted or modified by anyone including root users
@@ -483,6 +498,7 @@
 - Helps protect web applications against common exploits (e.g., SQL injection, XSS) 
 - Can create custom rules to block or allow traffic based on attributes (e.g., IP, geolocation) 
 - Provides a robust solution for filtering web traffic and enforcing access rules 
+- Cannot be directly attached to Network Load Balancers (NLBs) - use Shield Advanced for NLB protection 
 
 ### AWS Shield Advanced
 - **Key Features**:
@@ -491,6 +507,9 @@
   - Can protect Amazon EC2 instances, Elastic Load Balancing, CloudFront distributions, and more
   - Ensures website remains available during DDoS attacks
   - Integrates with CloudFront for edge-based protection
+  - Provides 24×7 access to the AWS DDoS Response Team (DRT) for assistance during attacks
+  - Offers protection against DDoS-related charges that might result from attacks
+  - Particularly important for Network Load Balancers which cannot use AWS WAF directly
 
 ### AWS IAM Identity Center (AWS Single Sign-On)
 - **Key Features**:
@@ -612,6 +631,14 @@
   - Helps mitigate DDoS attacks by distributing traffic across multiple edge locations
   - Integrates with AWS Shield (including standard protection at no extra cost)
   - Provides a global distribution network for both static and dynamic website content
+- **Content Delivery Optimization**:
+  - Ideal for caching and delivering static content like HTML pages to global audiences
+  - Provides efficient and effective solution for delivering media files stored in S3 globally
+  - Caches content at edge locations nearest to end users for maximum performance
+  - Can handle millions of views from around the world without impacting origin S3 buckets
+  - More effective for global content delivery than presigned URLs, cross-region replication, or Route 53 geoproximity
+  - Securely delivers confidential media files with options for signed URLs/cookies for protected content
+  - Offers significant performance advantages over accessing S3 buckets directly
 
 ### Amazon VPC
 - **Internet Gateways**:
