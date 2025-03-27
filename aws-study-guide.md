@@ -86,6 +86,7 @@
   - **DynamoDB + AWS Backup** :
   - Use AWS Backup for fully managed backup/restore solutions with long-term retention (e.g., 7 years).
   - Confirmed as best practice for compliance archiving.
+
 ### Amazon Neptune
 - **Use Cases**:
   - Fully managed graph database service 
@@ -305,6 +306,7 @@
 - **Versioning & MFA Delete**:
   - Enable versioning and MFA delete to add extra protection against accidental/malicious deletions of objects.
   - Validated best practice for critical data.
+  - When an object is deleted from a versioned bucket, a delete marker is placed on the current version, while older versions remain, enabling recovery of the prior version.
 - **S3 Object Lock**:
   - Enables write-once-read-many (WORM) protection for S3 objects
   - Compliance mode prevents objects from being deleted or modified by anyone including root users
@@ -348,6 +350,7 @@
   - Supports sub-millisecond latency for HPC environments 
   - Ideal for scenarios like weather forecasting companies processing hundreds of gigabytes of data with sub-millisecond latency 
   - Provides a high-performance file system for large-scale data processing with parallel access requirements 
+  - Additionally, FSx for Lustre can be used for on-premises data center workloads that require Lustre clients to access HPC-level shared file systems. This is especially suited for gaming applications needing a fully managed, high-performance file system that works seamlessly with Lustre clients.
 
 ### Amazon Elastic File System (EFS)
 - **Key Features**:
@@ -605,6 +608,7 @@
   - Should be placed in different Availability Zones for fault tolerance
   - Replacing NAT instances with NAT gateways in different AZs ensures high availability and automatic scaling
   - Offers simplified management compared to self-managed NAT instances
+  - For multi-AZ high availability, create a NAT gateway in each public subnet for each Availability Zone. Then the route tables for private subnets route traffic to their local NAT gateway.
 - **Private Subnets**:
   - Provide enhanced security by isolating resources from direct internet access
   - Can use VPC endpoints to connect to AWS services without traversing the internet
@@ -865,11 +869,3 @@
   - Implement replication and health checks to enable instant failover across regions 
   - Active-active configurations validated for mission-critical applications.
 
-## Updates Made
-- Added **CloudFront DDoS Protection** details about how it helps mitigate DDoS attacks through global distribution
-- Enhanced **AWS Shield Advanced** section with details about DDoS protection capabilities
-- Added information about **Private Subnets** for securing applications that process sensitive data
-- Enhanced **VPC Endpoints** section with more details about secure access to S3 from private subnets
-- Added details about **Static Website Hosting** benefits for reducing operational overhead
-- Expanded **AWS Shield Advanced + CloudFront** as a combined solution for DDoS protection
-- Enhanced explanation of how the CloudFront CDN helps absorb attack traffic before it reaches origin servers
