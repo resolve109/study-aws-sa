@@ -368,6 +368,10 @@
   - Ideal for scenarios like weather forecasting companies processing hundreds of gigabytes of data with sub-millisecond latency 
   - Provides a high-performance file system for large-scale data processing with parallel access requirements 
   - Additionally, FSx for Lustre can be used for on-premises data center workloads that require Lustre clients to access HPC-level shared file systems. This is especially suited for gaming applications needing a fully managed, high-performance file system that works seamlessly with Lustre clients.
+  - The only fully managed AWS storage service compatible with Lustre client protocol
+  - Superior option compared to AWS Storage Gateway (which supports NFS/SMB), EC2 Windows file shares, or EFS (which uses NFS) when Lustre client support is specifically required
+  - Particularly well-suited for on-premises gaming applications requiring high-performance shared storage with Lustre protocol
+  - Provides cost-effective, high-performance, scalable file storage for workloads requiring the Lustre file system
 
 ### Amazon Elastic File System (EFS)
 - **Key Features**:
