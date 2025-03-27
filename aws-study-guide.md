@@ -201,6 +201,16 @@
   - Ideal for long-term data retention requirements (e.g., 7 years) for compliance purposes
   - More operationally efficient than custom scripts or manual backup processes for DynamoDB and other services
   - The most operationally efficient solution for maintaining long-term data retention such as DynamoDB tables that must be kept for 7+ years
+- **Vault Lock**:
+  - Offers two modes for protecting backups: governance mode and compliance mode
+  - Governance mode allows privileged users to delete or modify protected backups if needed
+  - Compliance mode enforces immutability where no user (including administrators) can delete protected backups
+  - When configured with a minimum retention period, ensures backups cannot be deleted until the period expires
+  - Critical for meeting regulatory requirements for immutable data retention
+  - Perfect for ensuring replicated backups (like FSx for Windows File Server) remain unmodified for specific durations
+  - Can be configured to retain backups for multiple years to meet long-term compliance requirements
+  - More restrictive than standard retention policies as it prevents override by administrators
+  - Especially valuable for financial and healthcare data that must be preserved unchanged for regulatory purposes
 
 ## Container and Kubernetes Services
 
@@ -249,7 +259,7 @@
   - When paired with AWS Fargate and Amazon DocumentDB (with MongoDB compatibility), provides the least disruptive path for migrating MongoDB-based containerized applications
 - **Fargate for EKS**:
   - Combining EKS with Fargate can minimize overhead while running containerized workloads, if using Kubernetes.
-  
+
 ## Compute Services
 
 ### AWS Elastic Beanstalk
@@ -424,6 +434,11 @@
   - Superior to other storage options like EFS (which uses NFS protocol) for Windows workloads
   - FSx for Windows File Server is the recommended storage solution for SharePoint in AWS, as it natively supports the SMB protocol and Active Directory integration required by SharePoint
   - Compared to alternatives, it offers the best combination of performance, native Windows compatibility, and simplified management for SharePoint workloads
+  - For disaster recovery across regions, can be paired with AWS Backup to create and copy backups to secondary regions
+  - Works with AWS Backup Vault Lock to ensure replicated backups cannot be deleted for specified retention periods
+  - Multi-AZ deployments provide higher resilience than Single-AZ for business-critical applications
+  - When RPO of minutes is required, should use Multi-AZ deployment with frequent backups scheduled through AWS Backup
+  - Can replicate file systems to other regions to protect against regional outages or for disaster recovery
 - **FSx for OpenZFS**:
   - For NFS-based Unix/Linux file workloads 
   - Does not support SMB 
@@ -612,6 +627,19 @@
   - Use Service Control Policies (SCPs) to prevent VPCs from gaining internet access
   - Enforce region-specific restrictions for regulatory compliance
   - Centrally manage policies across multiple AWS accounts
+- **Account Management**:
+  - AWS accounts can only be a member of one organization at a time
+  - To move an account between organizations, it must first be removed from the current organization before joining the new one
+  - The process for moving accounts requires: removing the account from the original organization, then inviting it to join the new organization
+  - More efficient than creating new accounts and migrating resources, which involves higher operational overhead
+  - Provides a clean separation when business units need to operate independently with their own management account
+- **Service Control Policies (SCPs)**:
+  - Can be used to prevent modification of mandatory CloudTrail configurations across member accounts
+  - Effectively restrict actions even for users with root-level access within member accounts
+  - Apply permission guardrails at the account, organizational unit, or organization root level
+  - Perfect for enforcing standard security controls when providing developers with individual AWS accounts
+  - More effective than IAM policies for restricting root user actions (which cannot be limited by IAM policies)
+  - Ensure security standards are maintained across all accounts regardless of individual user permissions
 
 ### AWS Control Tower
 - **Governance Features**:
@@ -645,6 +673,12 @@
   - Enable EC2 instances in private subnets to use AWS services without internet access
   - Create a more secure solution for file transfers between applications and storage services
   - Provide better security compared to using NAT gateways for S3 access
+  - Significantly reduce data transfer costs when accessing S3 from within the same AWS Region
+  - When properly configured with bucket policies using `aws:SourceVpce` condition, ensure data never traverses the public internet
+  - Perfect solution for applications that process sensitive information from S3 when compliance requirements prohibit internet transit
+  - Eliminate data transfer fees between EC2 instances and S3 within the same region when using gateway endpoints
+  - Can be combined with bucket policies to restrict S3 access to only traffic coming from specific VPC endpoints
+  - More cost-effective than using NAT gateways or internet gateways for S3 access from private subnets
 
 ### AWS Transit Gateway
 - **Key Features**:
@@ -708,6 +742,8 @@
   - Essential for serving static content like event reports that will receive millions of global views
   - The most efficient solution for globally distributing S3-hosted static websites with high traffic volume
   - Perfect for serving daily static HTML reports expected to generate millions of views from users around the world
+  - Eliminates the need for customers to maintain their own content distribution infrastructure while providing global reach
+  - Significantly reduces origin load by caching content at edge locations, improving performance for both static and dynamic content
 
 ### Amazon VPC
 - **Internet Gateways**:
