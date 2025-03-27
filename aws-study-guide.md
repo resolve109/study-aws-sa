@@ -111,12 +111,15 @@
   - Expired items are auto-deleted (within ~24-48 hours) without consuming write throughput 
   - TTL feature confirmed as an effective, cost-saving mechanism.
 - **DynamoDB Accelerator (DAX)**:
-  - Fully managed in-memory cache for DynamoDB 
-  - Delivers microsecond read latency (up to 10× performance improvement) 
-  - Ideal for read-intensive workloads that require extremely low latency 
-  - Requires minimal application changes (compatible with existing DynamoDB API calls via the DAX client) 
-  - DAX integration verified to significantly improve read performance.
-  - **DynamoDB + AWS Backup** :
+  - Fully managed, highly available, in-memory cache for DynamoDB 
+  - Delivers microsecond read latency (up to 10× performance improvement from milliseconds to microseconds)
+  - Ideal for read-intensive workloads that require extremely low latency
+  - Requires minimal application changes (compatible with existing DynamoDB API calls via the DAX client)
+  - The most operationally efficient solution for reducing DynamoDB latency compared to ElastiCache alternatives
+  - Simpler implementation than setting up DynamoDB Streams with Lambda and ElastiCache
+  - Perfect for applications handling millions of requests per day with increasing request volumes
+  - Specifically designed to integrate seamlessly with DynamoDB's programming model and API
+- **DynamoDB + AWS Backup** :
   - Use AWS Backup for fully managed backup/restore solutions with long-term retention (e.g., 7 years).
   - Confirmed as best practice for compliance archiving.
 - **Point-in-Time Recovery (PITR)**:
@@ -371,6 +374,14 @@
   - Automatically scales to handle varying numbers of concurrent users
   - Can be triggered by S3 event notifications when new objects are uploaded
   - Efficient for serverless architectures requiring automatic scaling in response to workload demands
+- **Lambda SnapStart**:
+  - Feature designed to reduce cold start latency for Java functions
+  - Creates and caches a snapshot of the initialized execution environment
+  - Significantly reduces startup time by eliminating initialization overhead
+  - More effective at reducing cold start times than simply increasing function timeout
+  - Better solution than just increasing memory, which improves execution speed but doesn't directly address cold start latency
+  - Perfect for Java applications that experience long cold start times due to JVM initialization and class loading
+  - Provides initialization performance improvements without the additional costs of provisioned concurrency
 
 ### EC2 Instance Management
 - **Hibernation and Warm Pools**:
@@ -402,6 +413,17 @@
   - Superior to storage-optimized instances which are designed for high sequential read/write access rather than memory-intensive operations
   - Better fit than HPC-optimized instances which focus on compute-bound applications with high network performance
   - Memory-optimized instance families align with SAP's typical resource consumption patterns and high memory requirements
+
+### EC2 Instance Purchase Options
+- **Compute Savings Plans**:
+  - Offer flexibility to change EC2 instance types and families while still reducing costs
+  - Provide reduced prices in exchange for commitment to a consistent amount of usage (measured in $/hour)
+  - Available in 1-year or 3-year terms
+  - Automatically apply to EC2 instance usage regardless of region, instance family, operating system, or tenancy
+  - Perfect for environments where compute needs change frequently (every 2-3 months)
+  - More flexible than Reserved Instances for organizations that need to change instance types regularly
+  - Offer better cost optimization than On-Demand instances for predictable workloads
+  - Allow for changes in instance type without losing the cost benefits of a committed usage plan
 
 ### AWS DataSync
 - **Primary Use**:
@@ -1129,6 +1151,16 @@
   - More appropriate than predictive scaling for truly random patterns that don't follow historical trends
   - Better than scheduled scaling which works only for known, time-based patterns
   - Ensures application performance is maintained during unexpected traffic spikes while optimizing costs during normal periods
+- **Scheduled Scaling**:
+  - Configure Auto Scaling groups to automatically scale at predetermined times
+  - Perfect for predictable workload patterns (e.g., scaling up every Friday evening)
+  - Minimizes operational overhead compared to manual scaling for recurring patterns
+  - More efficient than using CloudWatch Events/EventBridge with Lambda for simple scheduled scaling
+  - Allows precise specification of desired capacity at specific times
+  - Can be configured to scale both up and down according to schedule
+  - Ideal for workloads with known time-based patterns like batch processing jobs
+  - Provides the simplest solution for workloads with regular, predictable traffic patterns
+  - Can be combined with dynamic scaling policies to handle both predictable and unexpected load changes
 
 ### Amazon EC2
 - **Instance Purchasing Options**:
@@ -1257,6 +1289,20 @@
   - Allows organizations to move from self-managed MongoDB to a fully managed service while maintaining application compatibility
   - Supports existing MongoDB drivers and tools for smooth transition
   - Eliminates the operational overhead of managing database infrastructure
+
+### Amazon Macie
+- **Key Features**:
+  - Fully managed data security and privacy service 
+  - Uses machine learning and pattern matching to discover sensitive data like PII
+  - Can analyze data stored in Amazon S3 buckets to identify sensitive information
+  - Provides detailed reports on where sensitive data exists
+  - More suitable for PII discovery than Security Hub, Inspector, or GuardDuty
+  - Requires configuration in each region where data needs to be analyzed
+  - Creates automated discovery jobs that can be scheduled to run regularly
+  - Helps organizations meet compliance requirements for data protection
+  - Works with EventBridge to create automated notification workflows when PII is detected
+  - Can be used to scan S3 buckets to ensure compliance with regulations that prohibit storage of PII
+  - Perfect solution for organizations that need to automatically scan storage locations for sensitive information
 
 ### AWS Snowball with Tape Gateway
 - **Large Data Migration**:
