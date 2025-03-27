@@ -354,6 +354,11 @@
   - Helps identify cost-optimization opportunities and implement data-protection best practices 
   - Provides dashboards and metrics directly within AWS Management Console without custom configuration 
   - For large data ingestion from global sites, **S3 Transfer Acceleration** can significantly reduce upload latencies.
+  - Most effective solution for aggregating data from global sites when minimizing operational complexity is a requirement
+  - Provides faster transfer speeds without introducing operational complexity of multiple region buckets or physical transfer devices
+  - When combined with multipart uploads, is optimal for aggregating large data files (hundreds of GB) from global locations
+  - Superior to using Snowball Edge or EC2-based solutions for regular transfers of moderate data volumes (e.g., 500GB per site)
+  - Leverages CloudFront's edge network to route data more efficiently to S3
 - **Versioning & MFA Delete**:
   - Enable versioning and MFA delete to add extra protection against accidental/malicious deletions of objects.
   - Validated best practice for critical data.
@@ -369,6 +374,8 @@
   - The combination of versioning and MFA Delete is a more effective protection strategy than bucket policies, default encryption, or lifecycle policies alone
   - Versioning-enabled buckets allow you to recover from both unintended user actions and application failures
   - Most effective combination for protecting sensitive audit documents and confidential information
+  - For confidential audit documents, combining versioning and MFA Delete provides the most secure protection against accidental or malicious deletion IF complianc mode isn't sufficient, however compliance mode is the best option for regulatory compliance
+  - This approach directly addresses security concerns by making deletion of documents more secure, requiring a physical MFA device to confirm such actions
 - **S3 Object Lock**:
   - Enables write-once-read-many (WORM) protection for S3 objects
   - Compliance mode prevents objects from being deleted or modified by anyone including root users
@@ -379,6 +386,10 @@
   - You can configure an S3 VPC Gateway Endpoint and apply a bucket policy restricting access to only your VPC or VPC endpoint
   - This ensures all traffic stays within AWS without traversing the public internet
   - Commonly uses conditions such as `"aws:SourceVpc"` or `"aws:SourceVpce"` in the bucket policy
+  - Provides a secure and reliable method for applications in private subnets to access S3 buckets
+  - Eliminates the need for NAT gateways or VPN for private access to S3
+  - Creates a more secure solution for file transfers between applications and storage services 
+  - Enable EC2 instances in private subnets to use AWS services without internet access
 
 ### Amazon FSx
 - **FSx for NetApp ONTAP**:
