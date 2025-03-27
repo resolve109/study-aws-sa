@@ -60,6 +60,14 @@
   - Automatically fails over to a standby instance during planned maintenance or unexpected outages
   - Particularly effective for PostgreSQL workloads needing both resilience and read scaling
   - Provides better operational efficiency than cross-region read replicas for regional high availability
+- **Reader Endpoints**:
+  - For offloading read traffic while maintaining high availability:
+    - Use RDS Multi-AZ DB cluster deployment (not just a Multi-AZ DB instance)
+    - Point read workloads to the reader endpoint
+  - This configuration provides automatic failover support in under 40 seconds
+  - Allows read traffic to be offloaded from the primary instance
+  - More cost-effective than creating and managing separate read replicas
+  - Simplifies the architecture compared to creating multiple standalone read replicas
 
 ### Amazon Aurora
 - **Overview**:
@@ -152,6 +160,15 @@
   - Retains the same database engine for minimal code changes 
   - Multi-AZ RDS deployment ensures high availability 
   - Oracle migration process validated as minimal-impact with Multi-AZ support.
+- **Large Database Migration**:
+  - For migrating large (e.g., 20 TB) databases with minimal downtime:
+    - Use AWS Snowball Edge Storage Optimized device for initial data transfer
+    - Implement AWS DMS with AWS SCT for schema conversion and replication of ongoing changes
+    - Continue replication after Snowball data is loaded to sync any changes made during transfer
+  - More cost-effective than Snowmobile for databases under 100 TB
+  - More suitable than Compute Optimized Snowball for straightforward data migrations
+  - Less expensive and faster to set up than dedicated Direct Connect for one-time migrations
+  - Provides a balanced approach between cost and minimizing downtime
 
 ## Caching Services
 
@@ -396,6 +413,14 @@
   - Better solution than just increasing memory, which improves execution speed but doesn't directly address cold start latency
   - Perfect for Java applications that experience long cold start times due to JVM initialization and class loading
   - Provides initialization performance improvements without the additional costs of provisioned concurrency
+- **File Processing Workflow**:
+  - For immediate processing of uploaded files:
+    - Design Lambda functions triggered by S3 upload events
+    - Process files and store results back to S3 or other destinations
+  - More cost-effective than running EC2 instances for sporadic processing needs
+  - Serverless approach eliminates the need to manage underlying infrastructure
+  - Automatically scales with the number of incoming files
+  - For cost-optimized storage, implement S3 Lifecycle rules to transition rarely accessed files to Glacier
 
 ### EC2 Instance Management
 - **Hibernation and Warm Pools**:
@@ -524,6 +549,15 @@
   - Can set retention periods (e.g., 365 days) to meet regulatory requirements
   - Ideal for medical data, financial records, and other information requiring immutability
   - Ensures regulatory compliance for data that cannot be modified or deleted
+- **Applying to Existing Data**:
+  - For meeting legal data retention requirements with minimal operational overhead:
+    - Turn on S3 Object Lock with compliance retention mode
+    - Set the retention period to match legal requirements (e.g., 7 years)
+    - Use S3 Batch Operations to apply these settings to existing data
+  - This approach is more efficient than manually recopying existing objects
+  - Governance mode is less suitable for strict legal requirements as it allows privileged users to override settings
+  - S3 Batch Operations significantly reduces operational overhead for applying retention settings to large datasets
+  - Compliance mode prevents deletion by any user, including administrators, until the retention period expires
 - **Restricting Bucket Access to VPC**:
   - You can configure an S3 VPC Gateway Endpoint and apply a bucket policy restricting access to only your VPC or VPC endpoint
   - This ensures all traffic stays within AWS without traversing the public internet
@@ -650,6 +684,18 @@
   - Reduces storage costs by deleting outdated backups 
   - Can create disaster recovery backup policies that back up data to isolated regions or accounts 
 
+### AWS Transfer Family
+- **SFTP Solution with EFS**:
+  - For implementing a serverless high-IOPS SFTP service:
+    - Create an encrypted Amazon EFS volume 
+    - Create an AWS Transfer Family SFTP service with elastic IP addresses and a VPC endpoint
+    - Attach a security group that allows only trusted IP addresses
+    - Attach the EFS volume to the SFTP service endpoint
+  - This provides a highly available SFTP service with integrated AWS authentication
+  - More suitable for high IOPS workloads than S3-based solutions
+  - Offers better throughput for file systems requiring high performance
+  - Allows maintaining control over user permissions with the same serverless benefits
+
 ## Security and Identity Services
 
 ### AWS KMS (Key Management Service)
@@ -690,6 +736,15 @@
   - **AWS KMS**: Manages encryption keys, not arbitrary secrets 
   - **AWS Systems Manager Parameter Store**: Can store secrets, but has no built-in rotation 
 
+### AWS Systems Manager
+- **Session Manager Logging**:
+  - To send Session Manager logs to S3 for archival with minimal operational overhead:
+    - Enable S3 logging directly from the Systems Manager console
+    - Choose an S3 bucket as the destination for session data
+  - This approach is more operationally efficient than using CloudWatch agents with export to S3
+  - Eliminates the need for custom script development or additional services
+  - Provides the most direct path for archiving Session Manager logs
+
 ### AWS Firewall Manager
 - **Key Benefits**:
   - Centrally configure AWS WAF rules across accounts 
@@ -719,6 +774,14 @@
 - Can create custom rules to block or allow traffic based on attributes (e.g., IP, geolocation) 
 - Provides a robust solution for filtering web traffic and enforcing access rules 
 - Cannot be directly attached to Network Load Balancers (NLBs) - use Shield Advanced for NLB protection 
+- **Rate-Limiting**:
+  - To block illegitimate traffic with minimal impact on legitimate users:
+    - Deploy AWS WAF and associate it with an Application Load Balancer
+    - Configure rate-limiting rules to restrict requests per client
+  - More effective than network ACLs for handling attacks from changing IP addresses
+  - Provides granular control over traffic patterns without impacting legitimate users
+  - Better solution than GuardDuty which focuses on detection rather than prevention
+  - Superior to Amazon Inspector which is for security assessment rather than traffic filtering
 
 ### AWS Shield Advanced
 - **Key Features**:
@@ -814,6 +877,16 @@
   - More effective for departmental permission management than using SCPs or permissions boundaries
   - IAM roles are intended for delegation scenarios, not for direct attachment to IAM groups
   - For cross-account or service-based permissions, roles are more appropriate than group-based policies
+- **Identity-Based Policies**:
+  - Can be attached to:
+    - IAM roles
+    - IAM groups
+  - Cannot be directly attached to:
+    - AWS Organizations (which use Service Control Policies instead)
+    - Amazon ECS resources (which use IAM roles for tasks)
+    - Amazon EC2 resources (which use instance profiles/roles)
+  - Understanding proper policy attachment points helps ensure effective permission management
+  - Following this guidance helps maintain proper security boundaries between service roles
 
 ## Networking and Content Delivery
 
