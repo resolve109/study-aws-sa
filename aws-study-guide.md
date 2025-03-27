@@ -450,7 +450,7 @@
   - Ideal for large multi-VPC or multi-account architectures 
   - Simplifies routing and management at scale 
   - Confirmed as an effective solution for centralizing network management.
-
+  
 ### AWS Direct Connect
 - **Redundancy Best Practices**:
   - For mission-critical workloads, use multiple connections at separate locations/devices 
