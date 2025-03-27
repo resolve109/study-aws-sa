@@ -368,6 +368,7 @@
   - Lifecycle policies help manage objects and storage costs but don't protect against accidental deletion
   - The combination of versioning and MFA Delete is a more effective protection strategy than bucket policies, default encryption, or lifecycle policies alone
   - Versioning-enabled buckets allow you to recover from both unintended user actions and application failures
+  - Most effective combination for protecting sensitive audit documents and confidential information
 - **S3 Object Lock**:
   - Enables write-once-read-many (WORM) protection for S3 objects
   - Compliance mode prevents objects from being deleted or modified by anyone including root users
@@ -787,6 +788,18 @@
   - Saves time and resources by eliminating repeated work each time the job runs
   - Increases efficiency for daily or periodic ETL jobs by only processing incremental updates
 
+### Data Analytics Solutions
+- **Clickstream and Ad-hoc Analysis**:
+  - Use Amazon Athena for one-time queries against data in S3 with minimal operational overhead
+  - Combine with Amazon QuickSight for creating KPI dashboards and visualizations
+  - Use AWS Lake Formation blueprints to simplify data ingestion into data lakes
+  - AWS Glue can crawl sources, extract data, and transform it to analytics-friendly formats like Parquet
+  - This serverless approach requires less operational overhead than custom Lambda functions or Redshift
+  - Provides a more cost-effective solution than running Kinesis Data Analytics for one-time queries
+  - Enables SQL-based analysis without managing infrastructure
+  - Ideal for consolidating batch data from databases and streaming data from sensors for business analytics
+  - Most effective combination for producing KPI dashboards with minimal operational overhead
+
 ## Encryption and Data Protection
 
 ### EBS Encryption by Default
@@ -965,3 +978,12 @@
   - Consider active-active multi-region architectures (using global databases like DynamoDB global tables or Aurora Global Database) 
   - Implement replication and health checks to enable instant failover across regions 
   - Active-active configurations validated for mission-critical applications.
+
+### Amazon DocumentDB
+- **MongoDB Compatibility**:
+  - Fully managed MongoDB-compatible database service
+  - Ideal for migrating existing MongoDB workloads to AWS without code changes
+  - When paired with Amazon EKS and Fargate, provides the least disruptive migration path for containerized MongoDB applications
+  - Allows organizations to move from self-managed MongoDB to a fully managed service while maintaining application compatibility
+  - Supports existing MongoDB drivers and tools for smooth transition
+  - Eliminates the operational overhead of managing database infrastructure
