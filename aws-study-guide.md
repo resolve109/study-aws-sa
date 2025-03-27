@@ -202,7 +202,7 @@
   - EKS confirmed for providing managed Kubernetes with robust integration features.
 - **Fargate for EKS**:
   - Combining EKS with Fargate can minimize overhead while running containerized workloads, if using Kubernetes.
-  
+
 ## Compute Services
 
 ### AWS Elastic Beanstalk
@@ -617,7 +617,6 @@
   - Do not require patching, are automatically scalable, and provide built-in redundancy for high availability
   - Should be placed in different Availability Zones for fault tolerance
   - Replacing NAT instances with NAT gateways in different AZs ensures high availability and automatic scaling
-  - Offers simplified management compared to self-managed NAT instances
   - For multi-AZ high availability, create a NAT gateway in each public subnet for each Availability Zone. Then the route tables for private subnets route traffic to their local NAT gateway.
 - **Private Subnets**:
   - Provide enhanced security by isolating resources from direct internet access
@@ -704,6 +703,11 @@
   - Works with Athena to enable SQL-based analysis without managing infrastructure
   - Provides serverless, minimal-overhead solution for analyzing data stored in S3
   - Creates schema-on-read capabilities for JSON and other semi-structured data
+- **Job Bookmarks**:
+  - Enable AWS Glue jobs to track previously processed data
+  - Avoids reprocessing old data and focuses on newly added or changed data in S3
+  - Saves time and resources by eliminating repeated work each time the job runs
+  - Increases efficiency for daily or periodic ETL jobs by only processing incremental updates
 
 ## Encryption and Data Protection
 
@@ -883,5 +887,3 @@
   - Consider active-active multi-region architectures (using global databases like DynamoDB global tables or Aurora Global Database) 
   - Implement replication and health checks to enable instant failover across regions 
   - Active-active configurations validated for mission-critical applications.
-
-
