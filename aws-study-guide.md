@@ -46,6 +46,13 @@
   - Restore from snapshot when needed for the next test cycle
   - Significantly reduces costs for databases that are only needed periodically (e.g., monthly testing)
   - More cost-efficient than keeping the instance running continuously or modifying instance types repeatedly
+- **Amazon RDS Multi-AZ DB Cluster Deployment**:
+  - Deploys a primary DB instance with synchronous standby instances in different Availability Zones
+  - Provides both high availability and increased capacity for read workloads in a single solution
+  - Offers more operational efficiency than standard Multi-AZ deployments with separate read replicas
+  - Automatically fails over to a standby instance during planned maintenance or unexpected outages
+  - Particularly effective for PostgreSQL workloads needing both resilience and read scaling
+  - Provides better operational efficiency than cross-region read replicas for regional high availability
 
 ### Amazon Aurora
 - **Overview**:
@@ -259,6 +266,16 @@
   - When paired with AWS Fargate and Amazon DocumentDB (with MongoDB compatibility), provides the least disruptive path for migrating MongoDB-based containerized applications
 - **Fargate for EKS**:
   - Combining EKS with Fargate can minimize overhead while running containerized workloads, if using Kubernetes.
+- **Amazon CloudWatch Container Insights**:
+  - Purpose-built for collecting, aggregating, and summarizing metrics and logs from containerized applications
+  - Provides comprehensive monitoring for Amazon EKS, Amazon ECS, and Kubernetes on EC2
+  - Automatically collects detailed performance data at every layer of the container stack
+  - Offers a centralized view for monitoring container performance metrics and logs
+  - Specifically designed for monitoring microservices architectures in EKS clusters
+  - Integrates seamlessly with CloudWatch alarms and dashboards
+  - More tailored to containerized environments than standard CloudWatch agents
+  - Offers application-level insights without requiring custom instrumentation
+  - Provides more container-aware monitoring than CloudTrail or AWS App Mesh
 
 ## Compute Services
 
@@ -407,6 +424,14 @@
   - Eliminates the need for NAT gateways or VPN for private access to S3
   - Creates a more secure solution for file transfers between applications and storage services 
   - Enable EC2 instances in private subnets to use AWS services without internet access
+- **S3 Cross-Region Replication**:
+  - Automatically and asynchronously copies objects across S3 buckets in different AWS Regions
+  - Most operationally efficient way to maintain copies of data in multiple regions
+  - Requires versioning to be enabled on both source and destination buckets
+  - Only replicates new objects created after replication is configured (existing objects must be copied manually)
+  - Can be configured at the bucket level or with specific prefix filters
+  - Provides a managed solution for regulatory compliance requiring geographic data redundancy
+  - More efficient than custom Lambda solutions for copying objects between regions
 
 ### Amazon FSx
 - **FSx for NetApp ONTAP**:
@@ -648,6 +673,14 @@
   - Restricts operations to specific AWS Regions
   - Creates a secure and compliant environment while maintaining network isolation
   - Helps meet regulatory requirements for data handling and access
+- **AWS Control Tower Account Drift Notifications**:
+  - Automatically identifies changes to the organizational unit (OU) hierarchy
+  - Alerts operations teams when organizational structure changes occur
+  - Offers the least operational overhead for monitoring organizational changes
+  - More efficient than using AWS Config aggregated rules for monitoring OU hierarchy
+  - Superior to using CloudTrail organization trails for detecting organizational structure changes
+  - Provides automated monitoring without manual intervention
+  - More effective than CloudFormation drift detection for organizational structure monitoring
 
 ### Identity Federation
 - **SAML 2.0-based Federation**:
@@ -808,6 +841,16 @@
   - Most efficient solution for inspecting traffic with third-party security appliances before it reaches application servers
   - Particularly useful when integrating virtual firewall appliances from AWS Marketplace that are configured with IP interfaces
   - Can be deployed in a dedicated inspection VPC to centralize security inspection for multiple application VPCs
+
+### Route 53 Geolocation Routing
+- **Key Features**:
+  - Routes traffic based on the geographic location of users
+  - Optimizes website load times by directing users to the nearest geographic infrastructure
+  - Can direct traffic near specific AWS regions to on-premises data centers in the same area
+  - More precise for geographic traffic management than latency or weighted routing policies
+  - Ideal for minimizing load times when hosting infrastructure in multiple geographic locations
+  - Can be configured to route users based on continent, country, or US state
+  - Different from latency-based routing which focuses on network performance rather than geographic location
 
 ## Data Analytics and Visualization
 
