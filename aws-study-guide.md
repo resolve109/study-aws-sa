@@ -30,6 +30,7 @@
   - Reduces load on primary DB instance by routing queries to the read replica 
   - Enables elastically scaling beyond capacity constraints of a single DB instance for read-heavy workloads 
   - Emphasized that read replicas are cost-effective for scaling read workloads.
+  - **Additional Note on Reducing Operational Overhead**: Creating a read replica and directing heavy read queries or development/reporting workloads to it can significantly improve performance with minimal changes, reducing load on the primary.
 - **Additional Update for Serverless:**  
   - In architectures using AWS Lambda, using RDS Proxy is essential to reduce connection overhead.
   - Serverless use of RDS Proxy has been validated to improve performance.
@@ -86,6 +87,10 @@
   - **DynamoDB + AWS Backup** :
   - Use AWS Backup for fully managed backup/restore solutions with long-term retention (e.g., 7 years).
   - Confirmed as best practice for compliance archiving.
+- **Point-in-Time Recovery (PITR)**:
+  - Provides continuous backups of your tables, allowing restore to any second in the last 1-35 days
+  - Can easily meet an RPO of 15 minutes and an RTO of 1 hour by enabling PITR
+  - Allows quick recovery from accidental writes or deletes to a precise point in time
 
 ### Amazon Neptune
 - **Use Cases**:
@@ -313,6 +318,10 @@
   - Can set retention periods (e.g., 365 days) to meet regulatory requirements
   - Ideal for medical data, financial records, and other information requiring immutability
   - Ensures regulatory compliance for data that cannot be modified or deleted
+- **Restricting Bucket Access to VPC**:
+  - You can configure an S3 VPC Gateway Endpoint and apply a bucket policy restricting access to only your VPC or VPC endpoint
+  - This ensures all traffic stays within AWS without traversing the public internet
+  - Commonly uses conditions such as `"aws:SourceVpc"` or `"aws:SourceVpce"` in the bucket policy
 
 ### Amazon FSx
 - **FSx for NetApp ONTAP**:
@@ -647,6 +656,11 @@
   - Can be used to send VPC Flow Logs to Amazon CloudWatch Logs or S3 
   - Often used for streaming logs into Amazon OpenSearch Service for analysis 
   - Provides a simple way to capture, transform, and load streaming data (near real-time) 
+  - **Real-Time Ingestion Architecture**:
+    - API Gateway can send incoming data to Kinesis Data Streams 
+    - Kinesis Data Firehose can automatically load that data to S3 
+    - Use AWS Lambda for on-the-fly transformations 
+    - Minimizes operational overhead by avoiding self-managed EC2 ingestion hosts
 
 ### Amazon OpenSearch Service (successor to Amazon Elasticsearch Service)
 - **Key Features**:
