@@ -80,6 +80,16 @@
   - Use a separate reader endpoint for your read queries 
   - Validated the use of reader endpoints to isolate read workloads.
 
+### Amazon Aurora Serverless
+- **Cost-Effective Database for Sporadic Usage**:
+  - Ideal for applications with unpredictable usage patterns (heavy at month start, moderate at week start)
+  - Automatically adjusts database capacity based on application needs
+  - Pay only for database resources consumed on a per-second basis
+  - Supports MySQL compatibility without requiring database modifications
+  - More suitable than RDS for MySQL for sporadic workloads without manual scaling interventions
+  - Better than deploying MySQL on EC2 Auto Scaling groups which would require significant management overhead
+  - Perfect solution for migrating from on-premises MySQL with variable workloads
+
 ### Amazon Aurora Serverless v2
 - **Key Features**:
   - Automatically scales database capacity based on application demand
@@ -464,6 +474,15 @@
   - Serverless approach eliminates the need to manage underlying infrastructure
   - Automatically scales with the number of incoming files
   - For cost-optimized storage, implement S3 Lifecycle rules to transition rarely accessed files to Glacier
+- **Secure Database Access**:
+  - For granting Lambda functions access to DynamoDB tables:
+    - Create an IAM role with Lambda as a trusted service
+    - Attach a policy allowing read/write access to the DynamoDB table
+    - Set this role as the Lambda function's execution role
+  - Follows AWS best practices by using roles instead of stored credentials
+  - Avoids storing sensitive access keys in Lambda environment variables
+  - More secure than using IAM users with programmatic access
+  - Simpler than retrieving credentials from Parameter Store during function execution
 
 ### EC2 Instance Management
 - **Hibernation and Warm Pools**:
@@ -649,7 +668,7 @@
   - Most effective combination for protecting sensitive audit documents and confidential information
   - For confidential audit documents, combining versioning and MFA Delete provides the most secure protection against accidental or malicious deletion IF complianc mode isn't sufficient, however compliance mode is the best option for regulatory compliance
   - This approach directly addresses security concerns by making deletion of documents more secure, requiring a physical MFA device to confirm such actions
-**S3 Object Lock**:
+- **S3 Object Lock**:
   - Enables write-once-read-many (WORM) protection for S3 objects
   - Compliance mode prevents objects from being deleted or modified by anyone including root users
   - Can set retention periods (e.g., 365 days) to meet regulatory requirements
@@ -690,7 +709,6 @@
   - More scalable than creating IAM users for each customer
   - More efficient than deploying EC2 instances with ALBs in specific countries
   - Provides both security and performance for global content delivery with granular access control
-
 ### - **Secure Content Distribution**:
   - For distributing copyrighted or sensitive content globally while restricting access by country, combine S3 with CloudFront geographic restrictions
   - CloudFront's geographic restrictions feature can deny access to users in specific countries
@@ -699,7 +717,16 @@
   - More scalable than creating IAM users for each customer
   - More efficient than deploying EC2 instances with ALBs in specific countries
   - Provides both security and performance for global content delivery with granular access control
-Amazon FSx
+- **Preventing Public Access**:
+  - To ensure all S3 objects in an AWS account remain private:
+    - Enable S3 Block Public Access feature at the account level
+    - Use AWS Organizations to create SCPs that prevent IAM users from changing this setting
+    - Apply the SCP to the account or organizational units
+  - More effective than monitoring solutions like GuardDuty or Trusted Advisor that require remediation
+  - Prevents accidental exposure with minimal administrative overhead
+  - More appropriate than using Resource Access Manager which is designed for sharing resources, not monitoring
+
+### Amazon FSx
 - **FSx for NetApp ONTAP**:
   - Managed storage for SMB/NFS 
   - Multi-protocol access 
@@ -932,6 +959,14 @@ Amazon FSx
 - Particularly important for Network Load Balancers which cannot use AWS WAF directly
   - Critical for protecting NLBs in API-driven cloud communication platforms against DDoS attacks
   - Should be combined with AWS WAF on API Gateway for comprehensive protection of API architectures
+- **Global Accelerator Protection**:
+  - For protecting self-managed DNS services running on EC2 instances with Global Accelerator:
+    - Subscribe to AWS Shield Advanced
+    - Add the Global Accelerator as a protected resource (not the EC2 instances)
+  - Provides enhanced protection against DDoS attacks at the network and application layers
+  - More effective than protecting individual EC2 instances since Global Accelerator is the entry point
+  - Superior to WAF web ACLs with rate-limiting rules for comprehensive DDoS protection
+  - Offers the most complete protection for Global Accelerator endpoints distributing traffic across regions
 
 ### AWS IAM Identity Center (AWS Single Sign-On)
 - **Key Features**:
@@ -1043,6 +1078,12 @@ es
   - More secure than using IAM users with access keys
   - More appropriate than using Secrets Manager or Certificate Manager
   - Follows IAM best practices for cross-account access
+- **IP-Based Access Control**:
+  - IAM policies can use IP address conditions to restrict access:
+    - Use NotIpAddress condition with aws:SourceIp to deny actions from unauthorized IP ranges
+  - Will deny actions (like EC2 termination) when requests originate from IP addresses outside specified ranges
+  - Particularly useful for administrative actions that should only be performed from secure networks
+  - Enforces security at the API action level rather than just network level
 
 ## Networking and Content Delivery
 
@@ -1121,6 +1162,14 @@ es
   - Eliminate data transfer fees between EC2 instances and S3 within the same region when using gateway endpoints
   - Can be combined with bucket policies to restrict S3 access to only traffic coming from specific VPC endpoints
   - More cost-effective than using NAT gateways or internet gateways for S3 access from private subnets
+- **Private Connectivity Between Services**:
+  - For ensuring application traffic between EC2 and S3 doesn't traverse the public internet:
+    - Create a VPC endpoint for Amazon S3
+  - Enables private connectivity between instances in VPC and S3 without internet exposure
+  - No need for internet gateway, NAT device, VPN, or Direct Connect connections
+  - More appropriate than AWS KMS which manages encryption keys, not network paths
+  - Superior to just using private subnets which still require internet gateway or NAT for S3 access
+  - Better solution than virtual private gateways which connect VPCs to on-premises networks
 
 ### AWS Transit Gateway
 - **Key Features**:
