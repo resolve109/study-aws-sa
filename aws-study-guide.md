@@ -30,9 +30,9 @@
   - Reduces load on primary DB instance by routing queries to the read replica 
   - Enables elastically scaling beyond capacity constraints of a single DB instance for read-heavy workloads 
   - Emphasized that read replicas are cost-effective for scaling read workloads.
-- **Additional Update for Serverless**:
-  - In serverless architectures using AWS Lambda, using **Amazon RDS Proxy** is recommended to reduce persistent connection overhead and improve performance.
-  - Verified synergy of Lambda + RDS Proxy for better connection management.
+- **Additional Update for Serverless:**  
+  - In architectures using AWS Lambda, using RDS Proxy is essential to reduce connection overhead.
+  - Serverless use of RDS Proxy has been validated to improve performance.
 
 ### Amazon Aurora
 - **Overview**:
@@ -78,10 +78,9 @@
   - Ideal for read-intensive workloads that require extremely low latency 
   - Requires minimal application changes (compatible with existing DynamoDB API calls via the DAX client) 
   - DAX integration verified to significantly improve read performance.
-- **DynamoDB + AWS Backup** :
+  - **DynamoDB + AWS Backup** :
   - Use AWS Backup for fully managed backup/restore solutions with long-term retention (e.g., 7 years).
   - Confirmed as best practice for compliance archiving.
-
 ### Amazon Neptune
 - **Use Cases**:
   - Fully managed graph database service 
@@ -143,9 +142,9 @@
   - Use Amazon SNS and SQS to create a buffering layer between clients and backend processors (e.g., EC2 instances) 
   - If an EC2 instance fails, messages remain in the queue until another instance can process them 
   - Verified that decoupling via SQS enhances system resiliency.
-- **Microservices Migration**:
-  - Recommended for asynchronous communication in microservices-based architectures.
-  - Ensures decoupled, scalable processing.
+- **Additional Update for Microservices**:
+  - For microservices-based architectures transitioning from monolithic, SQS is recommended for asynchronous communication.
+  - Confirms SQS improves decoupling and scalability.
 
 ## Container and Kubernetes Services
 
@@ -158,13 +157,13 @@
     - Cost-effective for running tasks that exceed the maximum execution duration limit of AWS Lambda functions (15 minutes) 
     - Only pay for the vCPU and memory resources your containerized application uses while it's running 
     - Suitable for data processing jobs that run once daily and can take up to 2 hours to complete 
-    - Supports ECS Service Auto Scaling (target tracking on metrics like CPU utilization) to automatically adjust the number of running tasks based on demand 
-    - Fargate confirmed for serverless efficiency and simplified management.
+    - Supports ECS Service Auto Scaling (target tracking on metrics like CPU utilization) to automatically adjust the number of running tasks based on demand, ensuring high availability under heavy load 
+    - Fargate confirmed for its serverless efficiency and simplified management.
   - **EC2**: 
     - You manage and patch the underlying Amazon EC2 instances 
     - Allows more granular control over infrastructure 
     - Requires managing server infrastructure, including capacity, provisioning, and scaling 
-    - Recommended when specialized AMIs/hardware are required for container workloads.
+    - Recommended when specialized AMIs or hardware is required.
   - **ECS Anywhere**: 
     - Extend ECS to on-premises hardware or other clouds 
     - Use an external launch type for hybrid container management 
@@ -182,7 +181,7 @@
   - EKS confirmed for providing managed Kubernetes with robust integration features.
 - **Fargate for EKS**:
   - Combining EKS with Fargate can minimize overhead while running containerized workloads, if using Kubernetes.
-
+  
 ## Compute Services
 
 ### AWS Elastic Beanstalk
@@ -252,7 +251,7 @@
   - Storage classes have been confirmed to meet diverse performance and cost needs.
 - **Data Transfer**:
   - **Snowball**: Physical devices to transfer large data volumes offline 
-  - S3 Transfer Acceleration recommended for global data ingestion from multiple continents, combined with multipart upload to speed transfers.
+    - S3 Transfer Acceleration recommended for global data ingestion from multiple continents, combined with multipart upload to speed transfers.
 - **Encryption**:
   - **Client-Side Encryption**: Data is encrypted before upload (the client manages encryption) 
   - **Server-Side Encryption (SSE-S3)**: Amazon S3 manages encryption keys 
@@ -273,7 +272,8 @@
   - Analyzes metrics to deliver contextual recommendations for optimizing storage costs 
   - Can identify buckets that don't have S3 Lifecycle rules to abort incomplete multipart uploads 
   - Helps identify cost-optimization opportunities and implement data-protection best practices 
-  - Provides dashboards and metrics directly within AWS Management Console without custom configuration
+  - Provides dashboards and metrics directly within AWS Management Console without custom configuration 
+  - For large data ingestion from global sites, **S3 Transfer Acceleration** can significantly reduce upload latencies.
 - **Versioning & MFA Delete**:
   - Enable versioning and MFA delete to add extra protection against accidental/malicious deletions of objects.
   - Validated best practice for critical data.
@@ -292,7 +292,7 @@
   - ONTAP replication verified for seamless cross-region data access.
 - **FSx for Windows File Server**:
   - Uses SMB protocol for Windows-based file shares 
-  - Best solution for a Windows-based application needing a shared file system across multiple AZs.
+  - Recommended for Windows-based applications needing shared file systems across multiple AZs.
 - **FSx for OpenZFS**:
   - For NFS-based Unix/Linux file workloads 
   - Does not support SMB 
@@ -499,9 +499,7 @@
 - **Signed URLs/Cookies**:
   - Restrict access to private content by requiring a signed URL or cookie (often with an expiration time) 
   - Commonly used to securely serve content to authorized users (e.g., subscriber-only videos or downloads) 
-
   - For high-speed, secure global distribution, use CloudFront with S3. S3 Transfer Acceleration can also help for uploads from remote locations.
-
 ### Amazon VPC
 - **Internet Gateways**:
   - A single Internet Gateway can route traffic for the entire VPC (across all AZs) 
@@ -509,7 +507,7 @@
   - Do not require redundancy across Availability Zones (they are a managed service) 
 - **Managed Prefix Lists**:
   - Sets of one or more CIDR blocks to simplify security group and route table configurations 
-  - Customer-managed prefix lists can be shared across AWS accounts using Resource Access Manager 
+  - Customer-managed prefix lists can be shared across AWS accounts via AWS Resource Access Manager 
   - Helps centrally manage allowed IP ranges across an organization 
   - Makes it easier to update and maintain security groups and route tables 
   - Can consolidate multiple security group rules (with different CIDRs but same port/protocol) into a single rule 
@@ -646,8 +644,6 @@
   - Can proactively adjust the number of EC2 instances in anticipation of known load changes 
   - Optimizes costs and performance by ensuring sufficient capacity during peak times 
   - Eliminates lag in scaling up resources, addressing slow application performance issues under sudden load 
-  - Modifying an Auto Scaling group to span multiple AZs is crucial for high availability. 
-  - For global redundancy, consider distributing instances across Regions (if truly multi-Region).
 
 ## Best Practices and Key Concepts
 
@@ -763,13 +759,13 @@
 - **Website Deployment:** Enhanced static + dynamic website deployment patterns with S3, API Gateway, Lambda, DynamoDB, and CloudFront.
 - Merged all correct answer details (marked in green in the screenshots) into additional bullet points across multiple sections, increasing the overall file line count.
 - **New Updates:** 
-  - **FSx for Windows** for a Windows-based application needing a shared file system across multiple AZs.
-  - **ECS with EC2** recommended for specialized hardware or custom AMIs.
-  - **SQS for microservices** added for asynchronous decoupling.
-  - **RDS Proxy** recommended with Lambda to reduce connection overhead.
-  - **S3 Transfer Acceleration** for faster global data ingestion + multipart uploads.
-  - **S3 Versioning & MFA Delete** to protect critical data from accidental/malicious deletions.
-  - **DynamoDB + AWS Backup** for long-term data retention and compliance.
-  - **Auto Scaling** multi-AZ approach validated for high availability.
-- **No Additional Images Accessible:** Re-validation of the new images did not yield further updates due to inaccessibility.
+  - Added a bullet for **FSx for Windows File Server** as the recommended solution for shared Windows file systems across multiple AZs.
+  - Included guidance to use ECS with the EC2 launch type for dynamic container workloads requiring specialized hardware.
+  - Recommended SQS for asynchronous communication in microservices-based architectures.
+  - Highlighted the use of RDS Proxy with Lambda in serverless architectures.
+  - **S3 Transfer Acceleration** recommended for faster global data ingestion into S3.
+  - **S3 Versioning + MFA Delete** for protecting confidential data from accidental or malicious deletion.
+  - **AWS Backup** recommended for managing DynamoDB backups and retention for compliance (7+ years).
+  - **SQS FIFO** recommended for ensuring First-In-First-Out message ordering behind API Gateway in certain e-commerce scenarios.
+  - **ECS + ALB** for containerized monolithic migrations with minimal changes.
 
