@@ -573,8 +573,9 @@
 
 ##- Particularly important for Network Load Balancers which cannot use AWS WAF directly
   - Critical for protecting NLBs in API-driven cloud communication platforms against DDoS attacks
-  - Should be combined with AWS WAF on API Gateway for comprehensive protection of API architectures
-# AWS IAM Identity Center (AWS Single Sign-On)
+  - Should be combined with AWS WAF on API Gateway for comprehensive protection of API architectures  
+  
+### AWS IAM Identity Center (AWS Single Sign-On)
 - **Key Features**:
   - Centrally manage SSO access to multiple AWS accounts and business applications 
   - Enables unified management of users and their access 
