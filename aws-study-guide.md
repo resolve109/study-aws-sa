@@ -312,6 +312,14 @@
   - Enable versioning and MFA delete to add extra protection against accidental/malicious deletions of objects.
   - Validated best practice for critical data.
   - When an object is deleted from a versioned bucket, a delete marker is placed on the current version, while older versions remain, enabling recovery of the prior version.
+  - Versioning in S3 keeps multiple variants of an object in the same bucket
+  - With versioning, you can preserve, retrieve, and restore every version of every object stored
+  - After versioning is enabled, if S3 receives multiple write requests for the same object simultaneously, it stores all of those objects
+  - MFA Delete requires the bucket owner to include two forms of authentication in any request to delete a version or change the versioning state
+  - MFA Delete provides additional authentication for: changing the versioning state of your bucket and permanently deleting an object version
+  - While bucket policies can restrict access based on conditions, they don't directly protect against accidental deletion like versioning and MFA Delete do
+  - Default encryption ensures objects are encrypted at rest but doesn't protect against deletion
+  - Lifecycle policies help manage objects and storage costs but don't protect against accidental deletion
 - **S3 Object Lock**:
   - Enables write-once-read-many (WORM) protection for S3 objects
   - Compliance mode prevents objects from being deleted or modified by anyone including root users
@@ -618,11 +626,12 @@
   - Should be placed in different Availability Zones for fault tolerance
   - Replacing NAT instances with NAT gateways in different AZs ensures high availability and automatic scaling
   - For multi-AZ high availability, create a NAT gateway in each public subnet for each Availability Zone. Then the route tables for private subnets route traffic to their local NAT gateway.
-- **Private Subnets**:
-  - Provide enhanced security by isolating resources from direct internet access
-  - Can use VPC endpoints to connect to AWS services without traversing the internet
-  - Best practice for applications processing sensitive data (like medical records)
-  - Create a more secure network architecture for applications requiring S3 access
+  - Best practice for high availability is to create one NAT gateway in each AZ where you have private subnets
+  - This design ensures that if one AZ becomes unavailable, instances in other AZs can still access the internet
+  - Using NAT gateways is preferred over NAT instances as they're managed services that automatically scale and are more fault-tolerant
+  - NAT instances require more management and manual intervention for high availability and scaling
+  - A VPC can only have one internet gateway attached at any time
+  - Egress-only internet gateways are specifically designed for outbound-only IPv6 traffic, not for IPv4 traffic
 
 ### Elastic Load Balancing
 - **Types of Load Balancers**:
