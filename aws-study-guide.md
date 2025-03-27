@@ -484,6 +484,8 @@
   - **S3 Standard-IA**: Infrequent access, cost savings for lower access frequency, still requires instant accessibility 
   - **S3 One Zone-IA**: Stores data in a single AZ, poses higher risk of data loss in the event of an AZ failure 
   - **S3 Intelligent-Tiering**: Automated cost optimization if access patterns are unknown 
+  - **S3 Intelligent-Tiering for Unpredictable Access Patterns**: Automatically moves data between frequent and infrequent access tiers based on observed access patterns without performance impact or operational overhead
+  - **S3 Intelligent-Tiering with Lifecycle Rules**: When access patterns cannot be predicted or controlled, use S3 Lifecycle rules to transition objects from S3 Standard to S3 Intelligent-Tiering for the most cost-effective storage solution
   - **S3 Glacier Instant Retrieval**: For archive data that needs immediate access (retrieval in milliseconds) 
   - **S3 Glacier Flexible Retrieval**: For rarely accessed long-term data with retrieval times from minutes to hours 
   - **S3 Glacier Deep Archive**: Lowest-cost storage for long-term archiving with retrieval times within 12 hours 
@@ -543,12 +545,68 @@
   - Most effective combination for protecting sensitive audit documents and confidential information
   - For confidential audit documents, combining versioning and MFA Delete provides the most secure protection against accidental or malicious deletion IF complianc mode isn't sufficient, however compliance mode is the best option for regulatory compliance
   - This approach directly addresses security concerns by making deletion of documents more secure, requiring a physical MFA device to confirm such actions
-- **S3 Object Lock**:
+- - **Data Transfer**:
+  - **Snowball**: Physical devices to transfer large data volumes offline 
+  - **S3 Transfer Acceleration**:
+    - Recommended for global data ingestion from multiple continents, combined with multipart upload to speed transfers
+    - Turning on S3 Transfer Acceleration with multipart uploads is optimal for aggregating large data files (hundreds of GB) from global locations
+    - Leverages CloudFront's edge network to route data more efficiently to S3
+    - Provides faster transfer speeds without introducing operational complexity of multiple region buckets or physical transfer devices
+    - Most effective solution for aggregating data from global sites when minimizing operational complexity is a requirement
+    - Superior to using Snowball Edge or EC2-based solutions for regular transfers of moderate data volumes (e.g., 500GB per site)
+- **Encryption**:
+  - **Client-Side Encryption**: Data is encrypted before upload (the client manages encryption) 
+  - **Server-Side Encryption (SSE-S3)**: Amazon S3 manages encryption keys 
+  - **Server-Side Encryption with AWS KMS (SSE-KMS)**: Uses AWS KMS for key management 
+  - **Server-Side Encryption with Customer-Provided Keys (SSE-C)**: Customer provides the encryption keys 
+- **Static Website Hosting**:
+  - You can host static websites on an S3 bucket 
+  - Typically combined with Amazon CloudFront for edge caching 
+  - Provides a scalable, cost-effective solution for hosting websites with minimal operational overhead
+  - Eliminates the need to maintain and patch web servers or content management systems
+- **S3 Access Points**:
+  - Provide separate custom-hosted endpoints with distinct access policies 
+  - Simplify managing access to shared datasets 
+- **Multi-Region Access Points**:
+  - Active-active S3 configuration with a single global endpoint 
+  - Intelligent routing to the closest bucket for performance 
+  - Supports S3 Cross-Region Replication for durability and failover 
+- **S3 Storage Lens**:
+  - Cloud-storage analytics feature for organization-wide visibility into object storage and activity 
+  - Analyzes metrics to deliver contextual recommendations for optimizing storage costs 
+  - Can identify buckets that don't have S3 Lifecycle rules to abort incomplete multipart uploads 
+  - Helps identify cost-optimization opportunities and implement data-protection best practices 
+  - Provides dashboards and metrics directly within AWS Management Console without custom configuration 
+  - For large data ingestion from global sites, **S3 Transfer Acceleration** can significantly reduce upload latencies.
+  - Most effective solution for aggregating data from global sites when minimizing operational complexity is a requirement
+  - Provides faster transfer speeds without introducing operational complexity of multiple region buckets or physical transfer devices
+  - When combined with multipart uploads, is optimal for aggregating large data files (hundreds of GB) from global locations
+  - Superior to using Snowball Edge or EC2-based solutions for regular transfers of moderate data volumes (e.g., 500GB per site)
+  - Leverages CloudFront's edge network to route data more efficiently to S3
+- **Versioning & MFA Delete**:
+  - Enable versioning and MFA delete to add extra protection against accidental/malicious deletions of objects.
+  - Validated best practice for critical data.
+  - When an object is deleted from a versioned bucket, a delete marker is placed on the current version, while older versions remain, enabling recovery of the prior version.
+  - Versioning in S3 keeps multiple variants of an object in the same bucket
+  - With versioning, you can preserve, retrieve, and restore every version of every object stored
+  - After versioning is enabled, if S3 receives multiple write requests for the same object simultaneously, it stores all of those objects
+  - MFA Delete requires the bucket owner to include two forms of authentication in any request to delete a version or change the versioning state
+  - MFA Delete provides additional authentication for: changing the versioning state of your bucket and permanently deleting an object version
+  - While bucket policies can restrict access based on conditions, they don't directly protect against accidental deletion like versioning and MFA Delete do
+  - Default encryption ensures objects are encrypted at rest but doesn't protect against deletion
+  - Lifecycle policies help manage objects and storage costs but don't protect against accidental deletion
+  - The combination of versioning and MFA Delete is a more effective protection strategy than bucket policies, default encryption, or lifecycle policies alone
+  - Versioning-enabled buckets allow you to recover from both unintended user actions and application failures
+  - Most effective combination for protecting sensitive audit documents and confidential information
+  - For confidential audit documents, combining versioning and MFA Delete provides the most secure protection against accidental or malicious deletion IF complianc mode isn't sufficient, however compliance mode is the best option for regulatory compliance
+  - This approach directly addresses security concerns by making deletion of documents more secure, requiring a physical MFA device to confirm such actions
+**S3 Object Lock**:
   - Enables write-once-read-many (WORM) protection for S3 objects
   - Compliance mode prevents objects from being deleted or modified by anyone including root users
   - Can set retention periods (e.g., 365 days) to meet regulatory requirements
   - Ideal for medical data, financial records, and other information requiring immutability
   - Ensures regulatory compliance for data that cannot be modified or deleted
+  - **For Public Information Sharing**: Can be combined with S3 static website hosting and a bucket policy allowing read-only access to create a secure way to share information with the public that cannot be modified or deleted before a specific date
 - **Applying to Existing Data**:
   - For meeting legal data retention requirements with minimal operational overhead:
     - Turn on S3 Object Lock with compliance retention mode
@@ -566,6 +624,7 @@
   - Eliminates the need for NAT gateways or VPN for private access to S3
   - Creates a more secure solution for file transfers between applications and storage services 
   - Enable EC2 instances in private subnets to use AWS services without internet access
+  - **Bucket Policy with VPC Endpoint**: Adding a bucket policy that restricts access to only traffic coming from the VPC endpoint ensures data never traverses the public internet
 - **S3 Cross-Region Replication**:
   - Automatically and asynchronously copies objects across S3 buckets in different AWS Regions
   - Most operationally efficient way to maintain copies of data in multiple regions
@@ -583,7 +642,15 @@
   - More efficient than deploying EC2 instances with ALBs in specific countries
   - Provides both security and performance for global content delivery with granular access control
 
-### Amazon FSx
+### - **Secure Content Distribution**:
+  - For distributing copyrighted or sensitive content globally while restricting access by country, combine S3 with CloudFront geographic restrictions
+  - CloudFront's geographic restrictions feature can deny access to users in specific countries
+  - Use signed URLs to provide secure, time-limited access to authorized customers
+  - More effective for geographic restrictions than MFA and public bucket access
+  - More scalable than creating IAM users for each customer
+  - More efficient than deploying EC2 instances with ALBs in specific countries
+  - Provides both security and performance for global content delivery with granular access control
+Amazon FSx
 - **FSx for NetApp ONTAP**:
   - Managed storage for SMB/NFS 
   - Multi-protocol access 
