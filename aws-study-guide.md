@@ -189,6 +189,14 @@
   - Offers better performance than RDS read replicas for scoreboard computation
   - More suitable than Memcached which lacks sorted data structures and persistence
   - Provides built-in functionality for leaderboards compared to custom CloudFront or RDS solutions
+- **Write-Through Caching Strategy**:
+  - Ideal when cache data must always match database data
+  - Ensures data consistency by writing to both the database and cache simultaneously when updates occur
+  - Perfect for multi-tier applications where changes in RDS databases must be immediately reflected in ElastiCache
+  - More effective than lazy loading or TTL strategies when strict data consistency is required
+  - Ensures that the cache always contains the latest data from the database
+  - Particularly suitable for financial applications or systems where data accuracy is critical
+  - Superior to other caching approaches for applications where stale data cannot be tolerated
 
 ## Messaging and Queuing
 
@@ -580,63 +588,14 @@
   - Most effective combination for protecting sensitive audit documents and confidential information
   - For confidential audit documents, combining versioning and MFA Delete provides the most secure protection against accidental or malicious deletion IF complianc mode isn't sufficient, however compliance mode is the best option for regulatory compliance
   - This approach directly addresses security concerns by making deletion of documents more secure, requiring a physical MFA device to confirm such actions
-- - **Data Transfer**:
+- **Lifecycle Policies for Versioned Objects**:
+  - Use S3 Lifecycle policies to automatically manage retention of specific numbers of object versions
+  - Can be configured to retain only a certain number of recent versions (e.g., two most recent versions) while deleting older versions
+  - More operationally efficient than Lambda functions or S3 Batch Operations for managing object versions
+  - Provides automated, rules-based version cleanup without manual intervention
+  - Significantly reduces storage costs in versioned buckets by removing unnecessary older versions
+- **Data Transfer**:
   - **Snowball**: Physical devices to transfer large data volumes offline 
-  - **S3 Transfer Acceleration**:
-    - Recommended for global data ingestion from multiple continents, combined with multipart upload to speed transfers
-    - Turning on S3 Transfer Acceleration with multipart uploads is optimal for aggregating large data files (hundreds of GB) from global locations
-    - Leverages CloudFront's edge network to route data more efficiently to S3
-    - Provides faster transfer speeds without introducing operational complexity of multiple region buckets or physical transfer devices
-    - Most effective solution for aggregating data from global sites when minimizing operational complexity is a requirement
-    - Superior to using Snowball Edge or EC2-based solutions for regular transfers of moderate data volumes (e.g., 500GB per site)
-- **Encryption**:
-  - **Client-Side Encryption**: Data is encrypted before upload (the client manages encryption) 
-  - **Server-Side Encryption (SSE-S3)**: Amazon S3 manages encryption keys 
-  - **Server-Side Encryption with AWS KMS (SSE-KMS)**: Uses AWS KMS for key management 
-  - **Server-Side Encryption with Customer-Provided Keys (SSE-C)**: Customer provides the encryption keys 
-- **Static Website Hosting**:
-  - You can host static websites on an S3 bucket 
-  - Typically combined with Amazon CloudFront for edge caching 
-  - Provides a scalable, cost-effective solution for hosting websites with minimal operational overhead
-  - Eliminates the need to maintain and patch web servers or content management systems
-- **S3 Access Points**:
-  - Provide separate custom-hosted endpoints with distinct access policies 
-  - Simplify managing access to shared datasets 
-- **Multi-Region Access Points**:
-  - Active-active S3 configuration with a single global endpoint 
-  - Intelligent routing to the closest bucket for performance 
-  - Supports S3 Cross-Region Replication for durability and failover 
-- **S3 Storage Lens**:
-  - Cloud-storage analytics feature for organization-wide visibility into object storage and activity 
-  - Analyzes metrics to deliver contextual recommendations for optimizing storage costs 
-  - Can identify buckets that don't have S3 Lifecycle rules to abort incomplete multipart uploads 
-  - Helps identify cost-optimization opportunities and implement data-protection best practices 
-  - Provides dashboards and metrics directly within AWS Management Console without custom configuration 
-  - For large data ingestion from global sites, **S3 Transfer Acceleration** can significantly reduce upload latencies.
-  - Most effective solution for aggregating data from global sites when minimizing operational complexity is a requirement
-  - Provides faster transfer speeds without introducing operational complexity of multiple region buckets or physical transfer devices
-  - When combined with multipart uploads, is optimal for aggregating large data files (hundreds of GB) from global locations
-  - Superior to using Snowball Edge or EC2-based solutions for regular transfers of moderate data volumes (e.g., 500GB per site)
-  - Leverages CloudFront's edge network to route data more efficiently to S3
-- **Versioning & MFA Delete**:
-  - Enable versioning and MFA delete to add extra protection against accidental/malicious deletions of objects.
-  - Validated best practice for critical data.
-  - When an object is deleted from a versioned bucket, a delete marker is placed on the current version, while older versions remain, enabling recovery of the prior version.
-  - Versioning in S3 keeps multiple variants of an object in the same bucket
-  - With versioning, you can preserve, retrieve, and restore every version of every object stored
-  - After versioning is enabled, if S3 receives multiple write requests for the same object simultaneously, it stores all of those objects
-  - MFA Delete requires the bucket owner to include two forms of authentication in any request to delete a version or change the versioning state
-  - MFA Delete provides additional authentication for: changing the versioning state of your bucket and permanently deleting an object version
-  - While bucket policies can restrict access based on conditions, they don't directly protect against accidental deletion like versioning and MFA Delete do
-  - Default encryption ensures objects are encrypted at rest but doesn't protect against deletion
-  - Lifecycle policies help manage objects and storage costs but don't protect against accidental deletion
-  - The combination of versioning and MFA Delete is a more effective protection strategy than bucket policies, default encryption, or lifecycle policies alone
-  - Versioning-enabled buckets allow you to recover from both unintended user actions and application failures
-  - Most effective combination for protecting sensitive audit documents and confidential information
-  - For confidential audit documents, combining versioning and MFA Delete provides the most secure protection against accidental or malicious deletion IF complianc mode isn't sufficient, however compliance mode is the best option for regulatory compliance
-  - This approach directly addresses security concerns by making deletion of documents more secure, requiring a physical MFA device to confirm such actions
-- - **Data Transfer**:
-- **Snowball**: Physical devices to transfer large data volumes offline 
   - **S3 Transfer Acceleration**:
     - Recommended for global data ingestion from multiple continents, combined with multipart upload to speed transfers
     - Turning on S3 Transfer Acceleration with multipart uploads is optimal for aggregating large data files (hundreds of GB) from global locations
@@ -1135,6 +1094,12 @@ es
     - Creating a second VPC with peering connection
     - Using Transit Gateway to connect multiple VPCs
     - Setting up VPN connections between VPCs
+- **Gateway Endpoints for S3 Cost Reduction**:
+  - For EC2 instances in private subnets that access S3 frequently, provisioning a VPC gateway endpoint eliminates data transfer costs
+  - Configure route tables for private subnets to use the gateway endpoint for S3 traffic instead of NAT gateways
+  - Eliminates data processing and transfer costs associated with routing S3 traffic through NAT gateways
+  - More cost-effective than using NAT instances or multiple NAT gateways for S3 access
+  - Provides direct, private connectivity to S3 without traversing the public internet or NAT devices
 
 ### AWS PrivateLink
 - **Overview**:
@@ -1184,6 +1149,12 @@ es
   - Reduces bandwidth limitations and improves performance for large data transfers
   - Ideal for transferring time-sensitive data to Amazon S3
   - Separates backup traffic from regular internet usage to minimize impact on users
+- **Cost Optimization Options**:
+  - For connections with low utilization (e.g., less than 10% usage of a 1 Gbps connection), consider a hosted connection with lower capacity
+  - Contact an AWS Direct Connect Partner to order a hosted connection (e.g., 200 Mbps) tailored to actual usage requirements
+  - Hosted connections provide the same security benefits as dedicated connections but at lower costs when full capacity isn't needed
+  - More cost-effective than maintaining a full 1 Gbps connection when only a fraction of the capacity is utilized
+  - Better than connection sharing, which doesn't fundamentally address low utilization issues
 
 ### AWS Global Accelerator
 - **Key Features**:
@@ -1236,6 +1207,13 @@ es
   - Perfect for serving daily static HTML reports expected to generate millions of views from users around the world
   - Eliminates the need for customers to maintain their own content distribution infrastructure while providing global reach
   - Significantly reduces origin load by caching content at edge locations, improving performance for both static and dynamic content
+- **Cost Optimization for Static Content**:
+  - Most cost-effective solution for reducing load on EC2 instances serving static website content
+  - Caches static files at edge locations closest to users, reducing origin server load
+  - Automatically scales to handle increasing website traffic without proportional cost increases
+  - Decreases content delivery latency while reducing data transfer costs from EC2 instances
+  - More suitable than ElastiCache, WAF, or multi-region ALB deployments for static content delivery
+  - Provides global content distribution with minimal operational overhead and infrastructure costs
 
 ### Amazon VPC
 - **Internet Gateways**:
@@ -1443,6 +1421,13 @@ es
   - Uses templates (in JSON/YAML) to define resources and their relationships 
   - Can create a wide variety of AWS resources programmatically 
   - Supports change sets to review modifications before applying them 
+- **Infrastructure as Code for Validated Prototypes**:
+  - After manually validating infrastructure prototypes, define them as CloudFormation templates
+  - Enables consistent, automated deployment of validated configurations across development and production environments
+  - More suitable than AWS Systems Manager for replicating complex infrastructure across Availability Zones
+  - More appropriate than AWS Config, which is designed for compliance auditing rather than deployment
+  - Provides more detailed infrastructure control than Elastic Beanstalk for complex multi-component architectures
+  - Perfect for deploying identical infrastructure components (Auto Scaling groups, ALBs, RDS) across multiple environments
 
 ### AWS Resource Access Manager (RAM)
 - **Key Features**:
@@ -1478,6 +1463,13 @@ es
   - Ideal for workloads with known time-based patterns like batch processing jobs
   - Provides the simplest solution for workloads with regular, predictable traffic patterns
   - Can be combined with dynamic scaling policies to handle both predictable and unexpected load changes
+- **Spot Instances for Scheduled Workloads**:
+  - Using Spot Instances for nightly batch jobs (e.g., between 12:00 AM - 6:00 AM) significantly reduces costs compared to On-Demand instances
+  - Particularly cost-effective for workloads that can be reprocessed if interrupted
+  - Works well with Auto Scaling groups that can scale based on CPU usage
+  - Suitable for batch processing jobs where occasional interruptions can be tolerated
+  - More cost-effective than Savings Plans or Reserved Instances for time-limited workloads that don't run continuously
+  - Better for off-peak processing jobs when Spot availability is typically higher
 
 ### Amazon EC2
 - **Instance Purchasing Options**:
@@ -1620,6 +1612,13 @@ es
   - Works with EventBridge to create automated notification workflows when PII is detected
   - Can be used to scan S3 buckets to ensure compliance with regulations that prohibit storage of PII
   - Perfect solution for organizations that need to automatically scan storage locations for sensitive information
+- **Data Discovery Capabilities**:
+  - Perfect for discovering personally identifiable information (PII) or financial information in S3 buckets
+  - Can be configured to scan data lakes managed by AWS Lake Formation
+  - Uses managed identifiers to detect sensitive data types like passport numbers and credit card numbers
+  - More effective for sensitive data discovery than AWS Audit Manager, S3 Inventory, or S3 Select
+  - Provides comprehensive reporting on where sensitive information exists in your storage
+  - Essential for internal audits and compliance verification
 
 ### AWS Snowball with Tape Gateway
 - **Large Data Migration**:
