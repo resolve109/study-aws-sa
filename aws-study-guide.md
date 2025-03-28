@@ -1061,6 +1061,17 @@
   - More operational efficient than setting up and managing SFTP servers on EC2 instances
   - Eliminates need to manage server infrastructure, patching, or scaling
 
+### AWS Storage Gateway
+- **AWS S3 File Gateway for Medical Research Data**:
+  - Ideal for providing low-latency access to S3 data for on-premises file-based applications
+  - Deployed as a virtual machine on premises at each location
+  - Allows clinics to access data in S3 buckets as if it were a local file system
+  - Caches frequently accessed data to minimize latency
+  - Works with read-only permissions on S3 buckets to ensure data security and immutability
+  - More appropriate than DataSync which is primarily for moving data, not providing continuous access
+  - Better solution than Volume Gateway for file-based applications that need access to S3 data
+  - More suitable than EFS which cannot be directly attached to on-premises servers without Direct Connect or VPN
+
 ## Security and Identity Services
 
 ### AWS KMS (Key Management Service)
@@ -1422,6 +1433,7 @@
   - Eliminates data processing and transfer costs associated with routing S3 traffic through NAT gateways
   - More cost-effective than using NAT instances or multiple NAT gateways for S3 access
   - Provides direct, private connectivity to S3 without traversing the public internet or NAT devices
+
 ### VPC Security Best Practices
 - **Multi-tier Security Group Configuration**:
   - For securing two-tier architectures with web and database layers:
@@ -1433,6 +1445,29 @@
   - Follows principle of least privilege by limiting database access to only web servers
   - Security groups don't support deny rules; they're stateful and only need allow rules
   - Simplifies security management as new web servers automatically get database acces
+
+### VPC Peering
+- **Secure Cross-VPC Database Access**:
+  - For EC2 instances in one VPC accessing databases in another VPC (same account):
+    - Configure a VPC peering connection between the VPCs
+    - Update route tables in both VPCs to route traffic to the peered VPC
+    - Configure security groups to allow traffic between the instances
+  - Provides secure private connectivity without exposing resources to the internet
+  - Uses private IP addresses which enhances security of database access
+  - More secure than allowing database access using public IP addresses via security groups
+  - Better than making database instances publicly accessible with public IP addresses
+  - More efficient and secure than proxy solutions through intermediate EC2 instances
+- **Cross-Account VPC Access**:
+  - For applications in VPC-A accessing files in EC2 instances in VPC-B across different AWS accounts:
+    - Set up VPC peering between the VPCs across accounts
+    - Configure appropriate route tables and security groups in both VPCs
+  - Provides private connectivity between VPCs in different accounts using AWS global infrastructure
+  - Eliminates single points of failure with AWS's highly available networking infrastructure
+  - Offers direct network routes using private IP addresses with no bandwidth constraints
+  - More appropriate than VPC gateway endpoints which are for connecting to AWS services, not EC2 instances
+  - Superior to virtual private gateway solutions which are typically for connecting to on-premises networks
+  - Better than private virtual interfaces (VIFs) which are used with Direct Connect for on-premises connectivity
+
 ### Network Load Balancer
 - **TLS for Data in Transit**:
   - For securing data transmission in multi-tier applications:
@@ -1442,6 +1477,7 @@
   - Essential for applications processing sensitive information like sensor data
   - Protects data in transit across all tiers of the application
   - More directly addresses transport security than WAF or Shield (which focus on different security aspects)
+
 ### Amazon VPC
 - **NAT Gateways for Internet Access from Private Subnets**:
   - For EC2 instances in private subnets that need to communicate with external services (like license servers):
@@ -1519,6 +1555,16 @@
   - Hosted connections provide the same security benefits as dedicated connections but at lower costs when full capacity isn't needed
   - More cost-effective than maintaining a full 1 Gbps connection when only a fraction of the capacity is utilized
   - Better than connection sharing, which doesn't fundamentally address low utilization issues
+- **Data Transfer Cost Optimization**:
+  - For minimizing data transfer egress costs when accessing data warehouse from corporate offices:
+    - Host visualization tools in the same AWS Region as the data warehouse
+    - Access the visualization tool over Direct Connect from corporate locations
+    - Process queries (e.g., 50 MB results) within AWS network
+    - Only transfer processed visualization data (e.g., 500 KB per webpage) over Direct Connect
+  - Significantly reduces egress costs by processing data within AWS before transferring
+  - More cost-effective than querying data warehouse directly over the internet
+  - Better than hosting visualization tools on-premises which would require transferring large query results
+  - More efficient than accessing AWS-hosted visualization tools over the internet
 
 ### AWS Global Accelerator
 - **Key Features**:
@@ -1553,6 +1599,16 @@
   - More effective than protecting individual EC2 instances since Global Accelerator is the entry point
   - Superior to WAF web ACLs with rate-limiting rules for comprehensive DDoS protection
   - Offers the most complete protection for Global Accelerator endpoints distributing traffic across regions
+
+### Amazon Route 53
+- **Multi-Value Routing Policy**:
+  - Returns IP addresses of all healthy EC2 instances in response to DNS queries
+  - When used with health checks, only returns addresses for healthy instances
+  - Provides a form of basic DNS-based load balancing
+  - More suitable than Simple routing policy which returns only one randomly selected value
+  - Different from Latency routing policy which routes based on network performance
+  - Not the same as Geolocation routing policy which routes based on user geographic location
+  - Perfect for applications requiring clients to receive addresses of all healthy backend instances
 
 ### Amazon CloudFront
 - **Key Features**:
