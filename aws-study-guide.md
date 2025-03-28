@@ -90,6 +90,14 @@
   - More efficient than exporting/importing database dumps for large databases
   - Retains all database configuration settings and data in a consistent state
   - Can be automated with AWS Backup for regular cross-account replication
+- **Encryption at Rest**:
+  - To encrypt data at rest in RDS DB instances:
+    - Create a key in AWS Key Management Service (AWS KMS)
+    - Enable encryption for the DB instances during creation
+  - Provides secure, managed service for creating and controlling encryption keys
+  - More appropriate than using Secrets Manager which is designed for storing credentials, not encrypting databases
+  - More suitable than using AWS Certificate Manager which secures data in transit, not at rest
+  - Ensures compliance with security requirements for data protection with minimal configuration
 
 ### Amazon Aurora
 - **Overview**:
@@ -1042,6 +1050,16 @@
   - Can be integrated with custom identity providers through AWS Lambda functions
   - Provides secure and reliable transfer of data over the Internet
   - More suitable for AS2 protocol requirements than DataSync, AppFlow, or Storage Gateway
+- **SFTP for S3 with Active Directory Authentication**:
+  - For enabling customers to download S3 files using existing SFTP clients:
+    - Set up AWS Transfer Family with SFTP for Amazon S3
+    - Configure integrated Active Directory authentication
+  - Provides fully managed SFTP service that scales automatically with demand
+  - Leverages existing on-premises Active Directory for user authentication
+  - Requires no changes to customer applications that use SFTP clients
+  - More appropriate than AWS DMS or DataSync for file transfer workflows
+  - More operational efficient than setting up and managing SFTP servers on EC2 instances
+  - Eliminates need to manage server infrastructure, patching, or scaling
 
 ## Security and Identity Services
 
@@ -1154,6 +1172,15 @@
   - Provides immediate protection against DDoS attacks with minimal operational overhead
   - More effective than CloudWatch monitoring which only provides detection but not prevention
   - Simpler to implement than custom Lambda@Edge solutions for rate limiting
+- **SQL Injection Protection**:
+  - For applications vulnerable to SQL injection attacks:
+    - Deploy AWS WAF in front of Application Load Balancer
+    - Associate appropriate web ACLs with SQL injection detection patterns
+  - Provides real-time protection against common web exploits
+  - More effective than security group rules which operate at network level, not application level
+  - More appropriate than AWS Shield Advanced which focuses on DDoS protection, not application attacks
+  - Superior to Amazon Inspector which assesses vulnerabilities but doesn't actively block attacks
+  - Essential for applications with database backends accessible through web interfaces
 
 ### AWS Shield Advanced
 - **Key Features**:
@@ -1568,6 +1595,14 @@
   - Decreases content delivery latency while reducing data transfer costs from EC2 instances
   - More suitable than ElastiCache, WAF, or multi-region ALB deployments for static content delivery
   - Provides global content distribution with minimal operational overhead and infrastructure costs
+- **Cache Invalidation for Content Updates**:
+  - When updates to static websites hosted in S3 are not appearing:
+    - Invalidate the CloudFront cache to force retrieval of the latest content
+  - Ensures updates from CI/CD pipelines are immediately visible to users
+  - More appropriate than adding Application Load Balancers for static content delivery
+  - More effective than adding ElastiCache which addresses database performance, not content delivery
+  - Better solution than modifying SSL certificates which don't affect content caching
+  - Essential operation when content updates must be immediately available to all users
 
 ### Amazon VPC
 - **Internet Gateways**:
@@ -2120,4 +2155,35 @@
   - More practical than Direct Connect or internet-based transfers for one-time large migrations
   - Particularly valuable when transfer must be completed within a specific timeframe (e.g., 2 weeks)
   - Encrypted-by-default for sensitive data protection during transit
+- **Cost Optimization for Tight Timeframes**:
+  - For transferring massive datasets (e.g., 5 PB) to AWS with bandwidth limitations:
+    - AWS Snowball/Snowball Edge devices provide offline data transfer capability
+    - Significantly reduces transfer time compared to internet-based transfers
+    - Ensures transfer can complete within required business timeframes (e.g., 2 weeks)
+    - More efficient than Direct Connect for one-time transfers of multi-petabyte scale
+  - Most appropriate option when physical shipping is faster than network transfer
+  - Essential when business requirements demand transfer completion by specific dates
+  - More reliable than attempting to maximize internet bandwidth for extremely large datasets
+
+### VPC CIDR Selection
+- **For VPC Peering Connections**:
+  - When creating a new VPC to peer with an existing VPC (e.g., 192.168.0.0/24), select a non-overlapping CIDR block
+  - A CIDR block like 10.0.1.0/24 is appropriate as it doesn't overlap with 192.168.0.0/24
+  - Avoid using the same CIDR block (e.g., 192.168.0.0/24) as the existing VPC
+  - Don't use /32 subnet masks (e.g., 10.0.1.0/32 or 192.168.1.0/32) as they represent single IP addresses, not usable ranges
+  - Ensure the CIDR block is large enough to support your VPC infrastructure needs
+  - Select the smallest viable CIDR range to conserve IP address space within your organization
+
+### SNS and SQS Integration
+- **Message Routing Architecture**:
+  - For separating and processing different message types efficiently:
+    - Create a single Amazon SNS topic
+    - Subscribe multiple Amazon SQS queues to the topic
+    - Configure SNS message filtering to route messages to appropriate queues based on message attributes
+  - Ensures messages are separated by type and processed appropriately
+  - Prevents message loss with SQS's durable message storage
+  - Maximizes operational efficiency with automated message routing
+  - More efficient than creating multiple separate SNS topics
+  - Simpler than using Kinesis streams for basic message routing scenarios
+  - Perfect for use cases where messages must be guaranteed processing within specific timeframes
 
