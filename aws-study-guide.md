@@ -728,6 +728,18 @@
   - Accelerates migration by maximizing available network bandwidth
   - More suitable than Snowcone, AWS Transfer Family, or manual methods for network-based migrations
   - Perfect for situations where controlling bandwidth usage is critical
+- **Continuous File Synchronization**:
+  - For copying files between S3 buckets and EFS file systems continuously:
+    - Create DataSync locations for source and destination storage
+    - Configure tasks with transfer mode set to transfer only changed data
+    - Schedule tasks to run at appropriate intervals
+  - Provides automated data movement with minimal operational overhead
+  - Only copies changed files, optimizing transfer efficiency and reducing costs
+  - More efficient than Lambda functions mounting file systems or EC2-based solutions
+  - Includes automatic encryption and data integrity validation for secure transfers
+  - Supports AWS security mechanisms including IAM roles and VPC endpoints
+  - Can use a purpose-built network protocol and parallel, multi-threaded architecture
+  - Reduces operational costs with flat per-gigabyte pricing compared to custom scripts
 
 ## Storage Services
 
@@ -1071,13 +1083,31 @@
   - More appropriate than DataSync which is primarily for moving data, not providing continuous access
   - Better solution than Volume Gateway for file-based applications that need access to S3 data
   - More suitable than EFS which cannot be directly attached to on-premises servers without Direct Connect or VPN
+- **File Gateway for Remote Access**:
+  - Ideal for providing low-latency access to S3 data for on-premises file-based applications
+  - Deployed as a virtual machine on premises at remote locations
+  - Allows accessing data in S3 buckets as if it were a local file system
+  - Caches frequently accessed data to minimize latency
+  - Works with read-only permissions to ensure data security and immutability
+  - Particularly valuable for organizations like medical research labs sharing data with remote clinics
+  - More appropriate than DataSync which is primarily for moving data, not providing continuous access
+  - Superior to Volume Gateway for file-based application access to S3 data
+  - Better than EFS which cannot be directly attached to on-premises servers without Direct Connect or VPN
 
 ## Security and Identity Services
 
 ### AWS KMS (Key Management Service)
 - **Customer Managed Keys**:
-  - Offers full control over rotation schedules, key policies, and lifecycle 
-  - Minimal operational overhead if using automated rotation 
+  - KMS keys that you create, own, and manage in your AWS account
+  - You have full control over these keys, including establishing and maintaining their key policies
+  - Can enable/disable keys, rotate cryptographic material, add tags, create aliases, and schedule deletion
+  - Customer managed keys appear on the Customer managed keys page of the AWS Management Console
+  - Can be identified by the KeyManager field value of "CUSTOMER" in the DescribeKey response
+  - Usable in cryptographic operations with usage tracked in AWS CloudTrail logs
+  - Many AWS services allow specifying customer managed keys to protect stored and managed data
+  - Incur monthly fees and usage fees beyond the free tier
+  - Counted against AWS KMS quotas for your account
+  - Support optional automatic key rotation for symmetric encryption keys with AWS KMS-created key material
 - **AWS Managed Keys**:
   - Automatically rotated every 3 years by AWS 
   - Less control over rotation schedule 
@@ -1087,16 +1117,14 @@
 - **External Keys**:
   - Allows key material import 
   - Provides highest level of control but more operational overhead 
-- **Key Policies and Permissions**:
-  - Grant permission for a Lambda IAM role within the KMS key's policy to decrypt 
-  - Directly associate Lambda's execution role with permissions to decrypt files 
-  - Follow least privilege by granting only required decrypt permissions 
-- **Automatic Key Rotation**:
-  - Can be enabled for Customer Master Keys (CMKs)
-  - Eliminates manual intervention for key rotation
-  - Helps meet compliance requirements for encryption key usage
-  - Provides detailed key usage logging through integration with CloudTrail
-  - Ensures all keys are rotated in compliance with company policies
+- **Key Rotation Benefits**:
+  - Key rotation changes only the key material (cryptographic secret), not the KMS key itself
+  - The key ID, ARN, region, policies, and permissions remain unchanged during rotation
+  - No need to update applications or aliases that reference the key ID or ARN
+  - Rotating key material doesn't affect the use of the KMS key in any AWS service
+  - AWS KMS automatically rotates customer managed keys yearly when enabled
+  - Properties of the KMS key remain constant regardless of key material changes
+  - AWS always rotates AWS managed keys yearly (rotation interval changed in May 2022)
 
 ### AWS Secrets Manager
 - **Key Features**:
@@ -1467,6 +1495,19 @@
   - More appropriate than VPC gateway endpoints which are for connecting to AWS services, not EC2 instances
   - Superior to virtual private gateway solutions which are typically for connecting to on-premises networks
   - Better than private virtual interfaces (VIFs) which are used with Direct Connect for on-premises connectivity
+- **Cross-Account Database Access**:
+  - Enables private networking communication between VPCs leveraging AWS global infrastructure
+  - Allows applications in one VPC to securely access databases in another VPC without exposing to the internet
+  - VPC peering supports inter-VPC connectivity without requiring gateways, VPN connections, or separate hardware
+  - Uses private IP addresses, enhancing security of database access compared to public IP connections
+  - For applications across AWS accounts that need to access files in EC2 instances:
+    - Set up VPC peering between VPCs across accounts
+    - Configure route tables and security groups in both VPCs
+  - Provides secure, direct network routes using private IP addresses with no bandwidth constraints
+  - No single points of failure as peering connections use AWS's highly available networking infrastructure
+  - More suitable than gateway endpoints which are designed for AWS services, not EC2 instances
+  - Better than virtual private gateway solutions which typically connect to on-premises networks
+  - Superior to proxy solutions through intermediate EC2 instances with Elastic IP addresses
 
 ### Network Load Balancer
 - **TLS for Data in Transit**:
@@ -1609,6 +1650,14 @@
   - Different from Latency routing policy which routes based on network performance
   - Not the same as Geolocation routing policy which routes based on user geographic location
   - Perfect for applications requiring clients to receive addresses of all healthy backend instances
+- **Multivalue Routing Policy**:
+  - Allows configuring DNS to return multiple IP addresses for websites or web applications
+  - Returns IP addresses of all healthy EC2 instances in response to DNS queries
+  - When used with health checks, only returns addresses for healthy instances
+  - Provides a form of basic DNS-based load balancing for spreading traffic across multiple instances
+  - Different from Simple routing policy which returns only one randomly selected value
+  - Not the same as Latency routing which routes based on network performance
+  - Distinct from Geolocation routing which routes based on user geographic location
 
 ### Amazon CloudFront
 - **Key Features**:
