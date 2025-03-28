@@ -81,6 +81,15 @@
   - More precise than manual snapshots for recovering from recent data corruption or accidental changes
   - Essential for maintaining business continuity after administrative errors
   - Provides a continuous backup capability with transaction logs for fine-grained recovery points
+- **Snapshot and Restore for Cross-Account Migration**:
+  - To move databases between AWS accounts:
+    - Create a snapshot of the source database
+    - Share the snapshot with the target account
+    - In the target account, restore a new database instance from the shared snapshot
+  - Provides a simple and secure method to transfer databases across accounts
+  - More efficient than exporting/importing database dumps for large databases
+  - Retains all database configuration settings and data in a consistent state
+  - Can be automated with AWS Backup for regular cross-account replication
 
 ### Amazon Aurora
 - **Overview**:
@@ -92,6 +101,15 @@
   - Can help alleviate performance degradation on the primary DB during peak load 
   - Use a separate reader endpoint for your read queries 
   - Validated the use of reader endpoints to isolate read workloads.
+- **PostgreSQL for Reporting**:
+  - For improving reporting performance with minimal code changes:
+    - Set up an Aurora PostgreSQL DB cluster that includes an Aurora Replica
+    - Direct reporting queries to the Aurora Replica instead of the primary instance
+  - Provides complete PostgreSQL compatibility, requiring minimal application changes
+  - Efficiently offloads read-heavy reporting workloads from the primary database
+  - Prevents reporting processes from impacting document modifications or additions
+  - Superior to Multi-AZ RDS deployments whose secondary instances aren't accessible for queries
+  - More compatible with existing PostgreSQL code than migrating to NoSQL solutions
 
 ### Amazon Aurora Serverless
 - **Cost-Effective Database for Sporadic Usage**:
@@ -176,6 +194,7 @@
   - Better suited for gaming applications than RDS with custom export scripts
   - More direct than solutions using Kinesis Data Streams for data export
   - Eliminates the need to maintain complex streaming pipelines for simple historical data access
+
 ### DynamoDB Integration Patterns
 - **Real-time Notifications**:
   - For alerting teams when new items are added to DynamoDB with minimal operational overhead:
@@ -187,7 +206,6 @@
   - More efficient than modifying application code to publish to multiple SNS topics
   - Prevents performance impact on the main application by using a separate notification path
   - Leverages managed services to minimize maintenance requirements
-
 
 ### Amazon Neptune
 - **Use Cases**:
@@ -305,6 +323,15 @@
   - Essential for financial applications where processing sequence impacts results
   - Prevents payment errors by ensuring transaction order integrity
   - Differs from standard queues which don't guarantee processing order
+- **Asynchronous Image Processing Pattern**:
+  - For multi-tier applications with time-consuming backend processes (like image thumbnail generation):
+    - Create an SQS queue to decouple frontend from backend processing
+    - When users upload images, immediately acknowledge receipt and place message on queue
+    - Process the queue messages asynchronously to generate thumbnails
+  - Allows providing fast response to users while longer processing continues in background
+  - Improves user experience by not making users wait for time-consuming operations
+  - More suitable than direct Lambda triggers or Step Functions for optimizing initial response time
+  - Enables efficient workflow management between application tiers
 
 ### Amazon SES (Simple Email Service)
 - **Email Delivery for Web Applications**:
@@ -392,6 +419,15 @@
     - Automatic copy to the destination region
   - Both options provide automated cross-region backup with minimal administrative effort
   - More efficient than manually copying images or using Lambda functions for orchestration
+- **Cross-Region EC2 and EBS Backup**:
+  - For backing up EC2 instances with attached EBS volumes and enabling cross-region recovery:
+    - Create a backup plan in AWS Backup
+    - Configure nightly backups of application EBS volumes
+    - Set up cross-region copy to a secondary region
+  - More operationally efficient than custom Lambda-based snapshot solutions
+  - Provides fully managed, centralized backup service across multiple AWS resources
+  - Ensures recoverability in different AWS regions for disaster recovery
+  - Offers simpler management than copying snapshots manually or with custom scripts
 
 ## Container and Kubernetes Services
 
@@ -428,6 +464,15 @@
   - Provides better container orchestration than EC2-based deployment for modernizing applications
   - Allows preservation of front-end and back-end code while enabling decomposition into smaller components
   - Reduces operational complexity when migrating from on-premises container environments
+- **AWS Application Auto Scaling for Fargate**:
+  - For optimizing costs while maintaining performance for ECS with Fargate:
+    - Use AWS Application Auto Scaling with target tracking policies
+    - Configure to scale based on CPU and memory usage metrics
+    - Set CloudWatch alarms to trigger scaling actions
+  - Automatically scales in when utilization decreases to reduce costs
+  - More appropriate than EC2 Auto Scaling for Fargate tasks
+  - More direct and easier to manage than custom Lambda-based scaling solutions
+  - Provides responsive scaling based on actual resource utilization rather than time-based scaling
 
 ### Amazon EKS (Elastic Kubernetes Service)
 - **Key Features**:
@@ -555,6 +600,15 @@
   - Eliminates cold start latency by pre-warming the Lambda runtime environment
   - Perfect for functions that are part of user-facing API responses where latency is critical
   - More effective for reducing response times than increasing function timeout or memory allocation
+- **SQS Queue Processing**:
+  - For processing SQS queues more efficiently than EC2-based solutions:
+    - Migrate script logic from EC2 instance to a Lambda function
+    - Configure Lambda to poll the SQS queue and process messages
+  - Automatically scales based on queue depth to handle growing number of messages
+  - Pay only for compute time used during actual message processing
+  - Eliminates need to provision and maintain EC2 instances for queue processing
+  - Significantly reduces operational costs compared to always-running EC2 solution
+  - Provides better cost optimization for unpredictable or growing workloads
 
 ### AWS Step Functions
 - **Application Orchestration**:
@@ -1275,7 +1329,15 @@
   - Better than GuardDuty or Inspector for historical audit trails of administrative actions
   - Records both console actions and programmatic API calls
   - Helps organizations meet compliance requirements by providing comprehensive activity logs
-
+- **Tracking Instance Sizing and Security Group Changes**:
+  - For monitoring oversized EC2 instances and unauthorized security group modifications:
+    - Enable AWS CloudTrail to track user activity and API usage
+    - Enable AWS Config and create rules for auditing and compliance
+  - CloudTrail provides detailed audit trails of who made specific changes
+  - AWS Config continuously monitors resource configurations and evaluates against desired states
+  - Together they provide comprehensive tracking and auditing capabilities
+  - More effective for detailed change tracking than Trusted Advisor or CloudFormation
+  - Essential for enforcing proper change control processes across AWS accounts
 
 ## Networking and Content Delivery
 
@@ -1606,6 +1668,14 @@
     - Messages with the same partition key are processed in the exact order they are received
   - Particularly important for financial transactions where order affects outcomes
   - Provides guaranteed ordering with high throughput for streaming data
+- **Near Real-Time Data Querying**:
+  - For handling high-rate data ingestion (up to 1 MB/s) with near real-time querying:
+    - Publish data to Amazon Kinesis Data Streams
+    - Use Kinesis Data Analytics to query the data in near real-time
+  - Ensures minimal data loss even when ingestion instances are rebooted
+  - More suitable for real-time analytics than Firehose with Redshift which introduces latency
+  - More durable than solutions using instance store or EBS volumes for temporary storage
+  - Provides scalable solution with built-in redundancy and fault tolerance
 
 ### Amazon OpenSearch Service (successor to Amazon Elasticsearch Service)
 - **Key Features**:
@@ -1665,6 +1735,14 @@
   - Provides the least operational overhead compared to custom EC2 scripts, EMR clusters, or Lambda functions
   - Perfect for integrating legacy applications that can't be modified with modern analytics platforms
   - Particularly valuable when source data format can't be changed but must be analyzed with COTS applications
+- **CSV to Redshift ETL Processing**:
+  - For processing legacy application CSV data for use with COTS applications:
+    - Create AWS Glue ETL job running on a schedule
+    - Configure job to process CSV files and load data into Amazon Redshift
+  - Provides least operational overhead compared to custom EC2 scripts or EMR clusters
+  - Fully managed service eliminates need to provision and maintain infrastructure
+  - More efficient than custom Lambda functions for complex data transformations
+  - Perfect for making legacy data available to applications that require SQL-compatible formats
 
 ### Data Analytics Solutions
 - **Clickstream and Ad-hoc Analysis**:
