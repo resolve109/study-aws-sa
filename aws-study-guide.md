@@ -9,7 +9,7 @@
   - Verified that read replicas help offload read traffic effectively.
   - For significant improvement in insert operations performance under heavy write loads, changing to Provisioned IOPS SSD (io1) storage is an effective solution
   - Particularly effective when storage performance is identified as the bottleneck for databases with millions of daily updates
-  - More targeted approach for addressing I/O bottlenecks than simply increasing instance memory or using burstable performance instances
+  - More targeted approach for addressing I/O bottleneck than simply increasing instance memory or using burstable performance instances
 - **Multi-AZ Deployments**:
   - Primarily for high availability and disaster recovery 
   - Not intended for scaling workloads 
@@ -1032,6 +1032,14 @@
   - Ideal for replacing on-premises inspection servers that perform traffic flow inspection and filtering
   - More appropriate for traffic inspection and filtering than GuardDuty (which focuses on threat detection)
   - Provides direct traffic filtering capabilities that Traffic Mirroring alone doesn't offer
+- **Traffic Control for Private Subnets**:
+  - Managed service that makes it easier to deploy essential network protections for VPCs
+  - Can be configured with domain list rule groups to allow specific outbound traffic
+  - Perfect solution for allowing EC2 instances to access only approved third-party software repositories for updates
+  - More appropriate than WAF for managing outbound traffic based on domain names/URLs
+  - Superior to security groups which can't filter traffic based on domain names
+  - Unlike Application Load Balancers, specifically designed to control outbound internet access
+  - Can be implemented by updating private subnet route tables to route outbound traffic through the firewall
 
 ### AWS WAF (Web Application Firewall)
 - **Key Attach Points**:
