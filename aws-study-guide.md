@@ -39,7 +39,6 @@
   - Reduces connection overhead and minimizes connection timeouts during traffic spikes
   - Requires minimal configuration - create a proxy and update application connection strings
   - More effective solution than increasing database instance size or implementing Multi-AZ for handling connection issues
-
 - **Read Replicas**:
   - Read-only copy of a DB instance 
   - Reduces load on primary DB instance by routing queries to the read replica 
@@ -76,6 +75,12 @@
   - Allows read traffic to be offloaded from the primary instance
   - More cost-effective than creating and managing separate read replicas
   - Simplifies the architecture compared to creating multiple standalone read replicas
+- **Point-in-Time Recovery**:
+  - Automated backups enable point-in-time recovery within the retention period (up to 35 days)
+  - Allows restoration to any moment within the retention window (e.g., 5 minutes before an accidental change)
+  - More precise than manual snapshots for recovering from recent data corruption or accidental changes
+  - Essential for maintaining business continuity after administrative errors
+  - Provides a continuous backup capability with transaction logs for fine-grained recovery points
 
 ### Amazon Aurora
 - **Overview**:
@@ -300,6 +305,7 @@
   - Essential for financial applications where processing sequence impacts results
   - Prevents payment errors by ensuring transaction order integrity
   - Differs from standard queues which don't guarantee processing order
+
 ### Amazon SES (Simple Email Service)
 - **Email Delivery for Web Applications**:
   - Fully managed email service for sending transactional emails, marketing communications, and notifications
@@ -558,6 +564,12 @@
   - Manages state transitions, error handling, and retries automatically
   - Provides visualization of complex workflows for easier monitoring and troubleshooting
   - More suitable for complex workflow orchestration than SQS, Glue, or combinations of Lambda and EventBridge
+- **Manual Approval Workflows**:
+  - Enables the integration of human approval steps within automated workflows
+  - Perfect for business processes that require human review or decision-making
+  - Can coordinate both serverless functions and traditional compute resources in the same workflow
+  - Handles state persistence automatically during long wait periods for human interaction
+  - More suitable than alternative orchestration solutions for workflows requiring human approvals
 
 ### EC2 Instance Management
 - **Hibernation and Warm Pools**:
@@ -1039,6 +1051,12 @@
   - Provides granular control over traffic patterns without impacting legitimate users
   - Better solution than GuardDuty which focuses on detection rather than prevention
   - Superior to Amazon Inspector which is for security assessment rather than traffic filtering
+- **API Gateway Protection**:
+  - Regional AWS WAF web ACLs with rate-based rules can protect API Gateway endpoints from HTTP flood attacks
+  - Automatically tracks requests per IP address and blocks IPs that exceed defined thresholds
+  - Provides immediate protection against DDoS attacks with minimal operational overhead
+  - More effective than CloudWatch monitoring which only provides detection but not prevention
+  - Simpler to implement than custom Lambda@Edge solutions for rate limiting
 
 ### AWS Shield Advanced
 - **Key Features**:
@@ -1196,6 +1214,15 @@ es
   - Will deny actions (like EC2 termination) when requests originate from IP addresses outside specified ranges
   - Particularly useful for administrative actions that should only be performed from secure networks
   - Enforces security at the API action level rather than just network level
+- **AWS IAM Password Policies**:
+  - Can define password complexity requirements at the account level that apply to all IAM users
+  - Password policies can specify minimum length, required character types, and expiration periods
+  - Setting an overall password policy for the entire AWS account simplifies security management
+  - More efficient than configuring password requirements individually
+  - Helps enforce organizational security standards consistently across all IAM users
+  - Essential component of account-level security best practices
+  - Allows organizations to align AWS credential policies with their internal security requirements
+
 ### AWS CloudTrail
 - **Tracking User Actions**:
   - Records API calls made by users, roles, or AWS services
@@ -1293,7 +1320,11 @@ es
   - NAT gateways must be placed in public subnets, not private subnets
   - Creates a scalable, highly available solution that doesn't require patching or maintenance
   - Appropriate for three-tier web applications where application and database tiers need outbound internet access
-
+- **Public Subnet Placement**:
+  - NAT gateways must be provisioned in a public subnet to provide internet access for resources in private subnets
+  - Placing NAT gateways in a private subnet would prevent them from routing traffic to the internet
+  - For three-tier applications, a NAT gateway enables application servers in private subnets to access external services
+  - Always configure NAT gateways in public subnets with routing to an Internet Gateway
 
 ### AWS PrivateLink
 - **Overview**:
@@ -1936,4 +1967,30 @@ es
   - Prevents reporting processes from impacting document modifications or additions
   - Superior to Multi-AZ RDS deployments whose secondary instances aren't accessible for queries
   - More compatible with existing PostgreSQL code than migrating to NoSQL solutions
+
+### EventBridge for Resource Scheduling
+- **Start/Stop EC2 and RDS Instances**:
+  - Create Lambda functions to start/stop EC2 instances and RDS instances on a schedule
+  - Configure EventBridge (formerly CloudWatch Events) to invoke these functions based on cron expressions
+  - More cost-effective than running a dedicated EC2 instance to manage the scheduling
+  - Easier to maintain than shell scripts and crontab
+  - Fully serverless solution with minimal operational overhead
+  - Ideal for non-production environments that only need to run during business hours
+
+### S3 Storage Cost Optimization
+- **Intelligent-Tiering for Unknown Access Patterns**:
+  - Create S3 Lifecycle configuration rules to transition objects to S3 Intelligent-Tiering
+  - Perfect for data with unpredictable or changing access patterns
+  - Automatically moves objects between frequent and infrequent access tiers
+  - Optimizes storage costs without performance impact or operational overhead
+  - More cost-effective than manual tier selection when access patterns are unknown
+
+### AWS Snowball Edge for Data Transfer
+- **Large Data Migration Use Cases**:
+  - Most cost-effective solution for transferring petabytes of data to AWS within tight timeframes
+  - Ideal when internet bandwidth constraints would make online transfer take months or years
+  - Securely transfers large datasets using physical devices with encryption
+  - More practical than Direct Connect or internet-based transfers for one-time large migrations
+  - Particularly valuable when transfer must be completed within a specific timeframe (e.g., 2 weeks)
+  - Encrypted-by-default for sensitive data protection during transit
 
