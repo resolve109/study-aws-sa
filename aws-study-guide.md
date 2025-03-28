@@ -619,6 +619,12 @@
   - More flexible than Reserved Instances for organizations that need to change instance types regularly
   - Offer better cost optimization than On-Demand instances for predictable workloads
   - Allow for changes in instance type without losing the cost benefits of a committed usage plan
+- **Reserved Instances for 24/7 Workloads**:
+  - For applications running continuously (24/7/365), EC2 Reserved Instances provide the most cost-effective solution
+  - Significantly less expensive than On-Demand Instances for predictable, constant workloads
+  - When combined with Aurora Reserved Instances for database layer, provides comprehensive cost optimization for always-on applications
+  - Better solution than Spot Instances which aren't suitable for applications requiring constant availability due to potential interruptions
+  - Most suitable for migrating legacy applications from on-premises that need to run continuously and have growing storage needs
 
 ### EC2 Security Groups
 - **Multi-Tier Web Application Security**:
@@ -631,6 +637,17 @@
   - Ensures database is only accessible through the application tier
   - More secure than allowing direct database access from public networks
 
+### Amazon RDS Cross-Account Migration
+- **Sharing Database Snapshots**:
+  - To move databases between AWS accounts:
+    - Create a snapshot of the source database
+    - Share the snapshot with the target account
+    - In the target account, restore a new database instance from the shared snapshot
+  - Provides a simple and secure method to transfer databases across accounts
+  - More efficient than exporting/importing database dumps for large databases
+  - Retains all database configuration settings and data in a consistent state
+  - Can be automated with AWS Backup for regular cross-account replication
+
 ### AWS DataSync
 - **Primary Use**:
   - Automates data transfers between on-premises storage and AWS or between different AWS storage services 
@@ -642,6 +659,13 @@
   - Offers higher throughput and security compared to transfers over public internet
   - Particularly suited for transferring instrumentation data (JSON files) to S3
   - Minimizes risk of data exposure and provides dedicated network connection
+- **AWS DataSync for Windows File Server Migration**:
+  - Ideal for migrating on-premises Windows file shares to FSx for Windows File Server
+  - Provides bandwidth throttling capabilities to minimize impact on shared network links
+  - Preserves file metadata and permissions during transfer
+  - Accelerates migration by maximizing available network bandwidth
+  - More suitable than Snowcone, AWS Transfer Family, or manual methods for network-based migrations
+  - Perfect for situations where controlling bandwidth usage is critical
 
 ## Storage Services
 
@@ -1013,6 +1037,17 @@
   - This approach is more operationally efficient than using CloudWatch agents with export to S3
   - Eliminates the need for custom script development or additional services
   - Provides the most direct path for archiving Session Manager logs
+- **Replacing SSH Keys**:
+  - Provides secure EC2 instance access without the need to manage SSH keys
+  - Allows connecting to instances via AWS Management Console or AWS CLI without:
+    - Opening inbound ports
+    - Managing SSH keys
+    - Setting up bastion hosts
+  - Centralizes access control through IAM policies
+  - Records session activity for audit purposes
+  - Significantly reduces administrative overhead compared to traditional SSH key management
+  - Perfect solution for meeting security requirements to remove all shared SSH keys
+  - More secure and manageable than STS-generated temporary credentials or bastion host approaches
 
 ### AWS Firewall Manager
 - **Key Benefits**:
@@ -1186,7 +1221,8 @@
   - This approach aligns with security best practices by ensuring users have only the permissions necessary for their job functions
   - More effective for departmental permission management than using SCPs or permissions boundaries
   - IAM roles are intended for delegation scenarios, not for direct attachment to IAM groups
-  - For cross-account or service-based permissions, roles are more appropriate than group-based polici- **Identity-Based Policies**:
+  - For cross-account or service-based permissions, roles are more appropriate than group-based policies
+- **Identity-Based Policies**:
   - Can be attached to:
     - IAM roles
     - IAM groups
@@ -1196,7 +1232,6 @@
     - Amazon EC2 resources (which use instance profiles/roles)
   - Understanding proper policy attachment points helps ensure effective permission management
   - Following this guidance helps maintain proper security boundaries between service roles
-es
 - **Identity-Based Policies**:
   - Can be attached to:
     - IAM roles
@@ -1230,7 +1265,6 @@ es
   - Helps enforce organizational security standards consistently across all IAM users
   - Essential component of account-level security best practices
   - Allows organizations to align AWS credential policies with their internal security requirements
-
 ### AWS CloudTrail
 - **Tracking User Actions**:
   - Records API calls made by users, roles, or AWS services
@@ -1624,6 +1658,13 @@ es
   - Avoids reprocessing old data and focuses on newly added or changed data in S3
   - Saves time and resources by eliminating repeated work each time the job runs
   - Increases efficiency for daily or periodic ETL jobs by only processing incremental updates
+- **Processing Legacy Data Formats**:
+  - Ideal for transforming legacy data formats (like CSV) to formats compatible with modern analytics tools
+  - Can be scheduled to run automatically at specified intervals
+  - Supports writing directly to Amazon Redshift for SQL-based analysis
+  - Provides the least operational overhead compared to custom EC2 scripts, EMR clusters, or Lambda functions
+  - Perfect for integrating legacy applications that can't be modified with modern analytics platforms
+  - Particularly valuable when source data format can't be changed but must be analyzed with COTS applications
 
 ### Data Analytics Solutions
 - **Clickstream and Ad-hoc Analysis**:
